@@ -255,6 +255,9 @@
                 });
             });
 
+            //TODO: detect when the parent container is not large enough for
+            // its children, and apply appropriate overflow and subtract scroll w/h
+
             var containerStyle = {};
             if (shareWidth && childrenCount > 1) {
                 containerStyle.display = 'flex';

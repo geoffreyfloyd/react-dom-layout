@@ -18,9 +18,9 @@
                     <Layout key="top" layoutHeight="50%" style={{ border: '10px solid black', borderRadius: '10px', margin: '5px', padding: '1em' }}>
                         {/* Top Left */}
                         <Layout key="top-left-left" layoutHeight="omit" layoutWidth="50%" style={{ border: '1px solid black', margin: '20px', overflowY: 'auto' }}>
-                            <Layout key="top-left" layoutFontSize="2rem" layoutWidth="flex:20rem" style={{ border: '1px solid black', margin: '5px', overflowY: 'auto' }}>
-                                {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(function (content) {
-                                    return <div layoutWidth="flex:2.5em:5em" style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
+                            <Layout key="top-left" layoutFontSize="2rem" layoutWidth="flex:10rem" style={{ border: '1px solid black', margin: '5px', overflowY: 'auto' }}>
+                                {range(1,15).map(function (content) {
+                                    return <div layoutWidth="flex:2.5em:5em" layoutBreakpoints={[{ dim: 'width', min: '2.5em', max: '4em', fontSize: '0.25em'}]} style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
                                 })}
                             </Layout>
                             <Layout key="top-left-right" layoutWidth="flex:20rem" style={{ border: '1px solid black', margin: '5px' }}>
@@ -35,12 +35,29 @@
                     </Layout>
                     {/* Bottom Half */}
                     <Layout key="bottom" layoutHeight="50%" style={{ border: '1px solid black', overflowY: 'scroll' }}>
-                        <div style={{height: '100vh'}}>Content 3</div>
+                        <Layout style={{height: '100vh'}}>
+                            {range(1,1000).map(function (content) {
+                                return <div layoutHeight="5em" layoutWidth="flex:5em:10em" style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
+                            })}
+                        </Layout>
                     </Layout>
                 </WindowSizeLayout>
             );
         }
     });
+
+    var range = function (start, end) {
+        if (end === undefined) {
+            end = start;
+            start = 1;
+        }
+
+        var rng = [];
+        for (var i = start; i <= end; i++) {
+            rng.push(i);
+        }
+        return rng;
+    };
 
     // make accessible for browser initialization
     if (window) {
