@@ -25,7 +25,8 @@ The value of these properties can be set to "flex", "omit", or a fixed/relative 
 - "50%" - percent based on same dimension of the parent layout
 - "50%h" - percent based on height of the parent layout
 - "50%w" - percent based on width of the parent layout
-- "10vh" - percent based on the root layout
+- "10vh" - percent based on height of the root layout
+- "10vw" - percent based on width of the root layout
 
 Additionally, "flex" supports minimum and maximum dimensions, such as:
 
@@ -55,7 +56,8 @@ When a react component is not itself a LayoutMixin, but contains a LayoutMixin c
 
 npm install --save https://github.com/geoffreyfloyd/react-dom-layout.git#master
 
-import {Layout, LayoutMixin, WindowSizeLayout} from 'react-dom-layout';
+Check out the demo for a self-explanatory example of our to use the components:
+http://geoffreyfloyd.github.io/react-dom-layout/
 
 The following CSS is required for layout to work consistently:
 
@@ -74,3 +76,9 @@ The following CSS is required for layout to work consistently:
 - Layout Breakpoints: apply styles, font sizes, and rules based on dimensional ranges
 - Support Simple Calculations (50%-2rem)
 - Support Complex Variable & Decision-Based Calculations (layoutFontSize="w<5rem?0.5rem:1rem")
+
+## Credits
+
+While I drew upon the ideas of many layout engines I've worked with over the years, the following code was used as a base point to hit the ground running. Many thanks, and I hope that others will in turn find use from my endeavors, or evolve it to overcome future obstacles:
+
+https://github.com/jsdf/react-layout
