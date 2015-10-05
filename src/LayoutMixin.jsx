@@ -224,10 +224,10 @@
                                 var flexArgs = wrap.layouts[i].split(':');
                                 if (flexArgs.length > 2 && flexArgs[2] !== '') {
                                     var max = convertToPixels(flexArgs[2], parentLayout[dim], parentLayout.fontSize);
-                                    if (max < evenDistrib) {
+                                    if (max < evenDistrib + wrap.measures[i]) {
                                         wrap.flexChildren--;
-                                        wrap.measures[i] += max;
-                                        wrap.available -= max;
+                                        wrap.measures[i] += (max - wrap.measures[i]);
+                                        wrap.available -= (max - wrap.measures[i]);
                                     }
                                     else {
                                         wrap.measures[i] += evenDistrib;
