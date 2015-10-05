@@ -65,14 +65,14 @@
 	                    { key: 'top', layoutHeight: '50%', style: { border: '10px solid black', borderRadius: '10px', margin: '5px', padding: '1em' } },
 	                    React.createElement(
 	                        Layout,
-	                        { key: 'top-left-left', layoutHeight: 'omit', layoutWidth: '50%', style: { border: '1px solid black', margin: '20px' } },
+	                        { key: 'top-left-left', layoutHeight: 'omit', layoutWidth: '50%', style: { border: '1px solid black', margin: '20px', overflowY: 'auto' } },
 	                        React.createElement(
 	                            Layout,
-	                            { key: 'top-left', layoutFontSize: '2rem', layoutWidth: 'flex:20rem', style: { border: '1px solid black', margin: '5px' } },
+	                            { key: 'top-left', layoutFontSize: '2rem', layoutWidth: 'flex:20rem', style: { border: '1px solid black', margin: '5px', overflowY: 'auto' } },
 	                            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(function (content) {
 	                                return React.createElement(
 	                                    'div',
-	                                    { layoutWidth: 'flex:5em', style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
+	                                    { layoutWidth: 'flex:2.5em:5em', style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
 	                                    'Content ',
 	                                    String(content)
 	                                );
@@ -20649,6 +20649,7 @@
 	            var newWrap = function newWrap(available) {
 	                return {
 	                    available: available,
+	                    rejected: 0,
 	                    layouts: [],
 	                    measures: [],
 	                    flexChildren: 0
@@ -20736,11 +20737,38 @@
 	            DIMENSIONS.forEach(function (dim) {
 	                precalc[dim].wraps.forEach(function (wrap) {
 	                    if (wrap.flexChildren > 0) {
-	                        // TODO: deal with max flex
+
+	                        // distribute (first pass)
 	                        var evenDistrib = wrap.available / wrap.flexChildren;
 	                        for (var i = 0; i < wrap.layouts.length; i++) {
 	                            if (layoutIsFlex(wrap.layouts[i])) {
-	                                wrap.measures[i] += evenDistrib;
+
+	                                var flexArgs = wrap.layouts[i].split(':');
+	                                if (flexArgs.length > 2 && flexArgs[2] !== '') {
+	                                    var max = convertToPixels(flexArgs[2], parentLayout[dim], parentLayout.fontSize);
+	                                    if (max < evenDistrib) {
+	                                        wrap.flexChildren--;
+	                                        wrap.measures[i] += max;
+	                                        wrap.available -= max;
+	                                    } else {
+	                                        wrap.measures[i] += evenDistrib;
+	                                        wrap.available -= evenDistrib;
+	                                    }
+	                                } else {
+	                                    wrap.measures[i] += evenDistrib;
+	                                    wrap.available -= evenDistrib;
+	                                }
+	                            }
+	                        }
+
+	                        // second pass, if needed
+	                        if (wrap.flexChildren > 0 && wrap.available > 0.0) {
+	                            evenDistrib = wrap.available / wrap.flexChildren;
+	                            for (var i = 0; i < wrap.layouts.length; i++) {
+	                                if (layoutIsFlex(wrap.layouts[i])) {
+	                                    wrap.measures[i] += evenDistrib;
+	                                    wrap.available -= evenDistrib;
+	                                }
 	                            }
 	                        }
 	                    }
