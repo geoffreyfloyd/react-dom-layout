@@ -124,6 +124,7 @@
             var newWrap = function (available) {
                 return {
                     available: available,
+                    rejected: 0,
                     layouts: [],
                     measures: [],
                     flexChildren: 0
@@ -214,11 +215,40 @@
             DIMENSIONS.forEach(function (dim) {
                 precalc[dim].wraps.forEach(function (wrap) {
                     if (wrap.flexChildren > 0) {
-                        // TODO: deal with max flex
+
+                        // distribute (first pass)
                         var evenDistrib = wrap.available / wrap.flexChildren;
                         for (var i = 0; i < wrap.layouts.length; i++) {
                             if (layoutIsFlex(wrap.layouts[i])) {
-                                wrap.measures[i] += evenDistrib;
+
+                                var flexArgs = wrap.layouts[i].split(':');
+                                if (flexArgs.length > 2 && flexArgs[2] !== '') {
+                                    var max = convertToPixels(flexArgs[2], parentLayout[dim], parentLayout.fontSize);
+                                    if (max < evenDistrib) {
+                                        wrap.flexChildren--;
+                                        wrap.measures[i] += max;
+                                        wrap.available -= max;
+                                    }
+                                    else {
+                                        wrap.measures[i] += evenDistrib;
+                                        wrap.available -= evenDistrib;
+                                    }
+                                }
+                                else {
+                                    wrap.measures[i] += evenDistrib;
+                                    wrap.available -= evenDistrib;
+                                }
+                            }
+                        }
+
+                        // second pass, if needed
+                        if (wrap.flexChildren > 0 && wrap.available > 0.0) {
+                            evenDistrib = wrap.available / wrap.flexChildren;
+                            for (var i = 0; i < wrap.layouts.length; i++) {
+                                if (layoutIsFlex(wrap.layouts[i])) {
+                                    wrap.measures[i] += evenDistrib;
+                                    wrap.available -= evenDistrib;
+                                }
                             }
                         }
                     }

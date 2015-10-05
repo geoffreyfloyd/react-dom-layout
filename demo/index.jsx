@@ -17,10 +17,10 @@
                     {/* Top Half */}
                     <Layout key="top" layoutHeight="50%" style={{ border: '10px solid black', borderRadius: '10px', margin: '5px', padding: '1em' }}>
                         {/* Top Left */}
-                        <Layout key="top-left-left" layoutHeight="omit" layoutWidth="50%" style={{ border: '1px solid black', margin: '20px' }}>
-                            <Layout key="top-left" layoutFontSize="2rem" layoutWidth="flex:20rem" style={{ border: '1px solid black', margin: '5px' }}>
+                        <Layout key="top-left-left" layoutHeight="omit" layoutWidth="50%" style={{ border: '1px solid black', margin: '20px', overflowY: 'auto' }}>
+                            <Layout key="top-left" layoutFontSize="2rem" layoutWidth="flex:20rem" style={{ border: '1px solid black', margin: '5px', overflowY: 'auto' }}>
                                 {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(function (content) {
-                                    return <div layoutWidth="flex:5em" style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
+                                    return <div layoutWidth="flex:2.5em:5em" style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
                                 })}
                             </Layout>
                             <Layout key="top-left-right" layoutWidth="flex:20rem" style={{ border: '1px solid black', margin: '5px' }}>
