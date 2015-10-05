@@ -18,12 +18,20 @@ Layout components (any react component that has the LayoutMixin applied) are res
 - layoutHeight
 
 The value of these properties can be set to "flex", "omit", or a fixed/relative size, such as:
-    "2em", "0.5rem", "50%", "10vh", "20px"
+
+- "20px"
+- "2em" - based on the current font size
+- "0.5rem" - based on the root font size
+- "50%" - percent based on same dimension of the parent layout
+- "50%h" - percent based on height of the parent layout
+- "50%w" - percent based on width of the parent layout
+- "10vh" - percent based on the root layout
 
 Additionally, "flex" supports minimum and maximum dimensions, such as:
-    "flex:2em" - minimum of 2em, no maximum.
-    "flex::10em" - no minimum, maximum of 10em.
-    "flex:2em:50%" - minimum of 2em, maximum 50% of the parent layout dimension.
+
+- "flex:2em" - minimum of 2em, no maximum.
+- "flex::10em" - no minimum, maximum of 10em.
+- "flex:2em:50%" - minimum of 2em, maximum 50% of the parent layout dimension.
 
 ### Relational Units and Font Size
 

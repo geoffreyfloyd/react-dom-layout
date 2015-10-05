@@ -4,12 +4,11 @@
     );
 }(function (React) {
     // many thanks to https://github.com/jsdf/react-layout for base of layout logic
-
     var DIMENSIONS = ['height', 'width'];
     var PARENT_CONTEXT = ['border', 'padding'];
     var THIS_CONTEXT = ['margin'];
     var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
-    var getRootLayoutContext;
+    var fontSizeBase, getRootLayoutContext;
 
     var LayoutMixin = {
         /*************************************************************
@@ -40,7 +39,7 @@
             var layoutContext = Object.assign({}, this.getLayoutContext());
 
             if (this.props.style) {
-                var sizeModifiers = getSizeModifiers(this.props.style, PARENT_CONTEXT, layoutContext.fontSize);
+                var sizeModifiers = getSizeModifiers(this.props.style, PARENT_CONTEXT, layoutContext);
                 DIMENSIONS.forEach(function (dim) {
                     if (layoutContext[dim]) {
                         layoutContext[dim] -= sizeModifiers[dim];
@@ -58,7 +57,7 @@
                 layoutContext = this.getRootLayoutContext();
                 layoutContext = Object.assign({fontSize: getFontSizeBase()}, layoutContext);
                 // register root
-                getRootLayoutContext = this.getRootLayoutContext.bind(this);
+                getRootLayoutContext = this.getRootLayoutContext;
             }
             else {
                 var inherited;
@@ -78,13 +77,14 @@
                 if ((inherited && this.props && this.props.layoutFontSize) ||
                     (this.props.style && this.props.style.fontSize))
                 {
+
                     layoutContext.fontSize = convertToPixels(
-                        (this.props.style.fontSize || this.props.layoutFontSize), undefined, layoutContext.fontSize);
+                        (this.props.style.fontSize || this.props.layoutFontSize), layoutContext);
                 }
             }
 
             if (this.props.style) {
-                var sizeModifiers = getSizeModifiers(this.props.style, THIS_CONTEXT, layoutContext.fontSize);
+                var sizeModifiers = getSizeModifiers(this.props.style, THIS_CONTEXT, layoutContext);
                 DIMENSIONS.forEach(function (dim) {
                     if (layoutContext[dim]) {
                         layoutContext[dim] -= sizeModifiers[dim];
@@ -96,8 +96,7 @@
         },
 
         getLocalLayout: function () {
-            var layoutContext;
-            var local;
+            var layoutContext, local;
 
             local = {};
             layoutContext = this.getLayoutContext();
@@ -164,9 +163,9 @@
                     var min = 1;
                     var flexChildren = 0;
 
-                    if (layoutIsFixed(def[dim], parentLayout[dim], parentLayout.fontSize)) {
+                    if (layoutIsFixed(def[dim], parentLayout, dim)) {
                         // fixed is min
-                        min = convertToPixels(def[dim], parentLayout[dim], parentLayout.fontSize);
+                        min = convertToPixels(def[dim], parentLayout, dim);
 
                         // deprecated
                         precalc[dim].fixedSum += min;
@@ -178,7 +177,7 @@
                         // check for flex min
                         var flexParams = def[dim].split(':');
                         if (flexParams.length > 1 && flexParams[1] !== '') {
-                            min = convertToPixels(flexParams[1], parentLayout[dim], parentLayout.fontSize);
+                            min = convertToPixels(flexParams[1], parentLayout, dim);
                         }
                         flexChildren++;
 
@@ -223,7 +222,7 @@
 
                                 var flexArgs = wrap.layouts[i].split(':');
                                 if (flexArgs.length > 2 && flexArgs[2] !== '') {
-                                    var max = convertToPixels(flexArgs[2], parentLayout[dim], parentLayout.fontSize);
+                                    var max = convertToPixels(flexArgs[2], parentLayout, dim);
                                     if (max < evenDistrib + wrap.measures[i]) {
                                         wrap.flexChildren--;
                                         wrap.measures[i] += (max - wrap.measures[i]);
@@ -276,8 +275,7 @@
         applyLayoutToChildren: function (children, measure) {
             var childIndex = 0;
             var processChild = function (child) {
-                var def;
-                var layout;
+                var def, layout;
                 if (!(child !== undefined && child !== null ? child.props : undefined)) {
                     childIndex++;
                     return child;
@@ -303,7 +301,7 @@
                 DIMENSIONS.forEach(function (dim) {
                     var wrap = getWrap(childIndex, measure.precalc[dim].wraps);
 
-                    if (layoutIsFixed(def[dim], measure.parentLayout[dim], measure.parentLayout.fontSize)) {
+                    if (layoutIsFixed(def[dim], measure.parentLayout, dim)) {
                         layout[dim] = wrap.measures[wrap.currentIndex];
                     }
                     else if (layoutIsFlex(def[dim])) {
@@ -349,7 +347,7 @@
                     // non-layout components need to account for margin
                     // because it won't get it's own render pass to call
                     // getLayoutContext, which accounts for margin
-                    var sizeModifiers = getSizeModifiers(style, THIS_CONTEXT);
+                    var sizeModifiers = getSizeModifiers(style, THIS_CONTEXT, measure.parentLayout);
                     DIMENSIONS.forEach(function (dim) {
                         if (style[dim]) {
                             style[dim] -= sizeModifiers[dim];
@@ -378,7 +376,7 @@
         /*************************************************************
          * RENDERING
          *************************************************************/
-        render: function() {
+        render: function () {
             var ref = this.props;
             var component = ref.component;
             var style = ref.style;
@@ -395,7 +393,7 @@
     /*************************************************************
      * INTERNAL METHODS
      *************************************************************/
-    function getWrap(index, wraps) {
+    function getWrap (index, wraps) {
         var wrap;
         var wrapsIndex = 0;
         while (!wrap && wrapsIndex < wraps.length) {
@@ -438,8 +436,8 @@
     }
 
     function getLayoutDef (component) {
-        var definition;
-        var defaultSetting;
+        var defaultSetting, definition;
+
         if (!hasReactLayout(component)) {
             // hold your horses, we're not giving up on laying out this
             // component just yet, let's check the style props
@@ -487,7 +485,7 @@
         }
     }
 
-    function getSizeModifiers (style, props, context, fontSize) {
+    function getSizeModifiers (style, props, context) {
         var size = {
             height: 0,
             width: 0
@@ -505,24 +503,24 @@
                 var mod = style[prop].split(' ');
 
                 if (prop === 'border') {
-                    sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, fontSize);
+                    sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, '*');
                 }
                 else { //padding, margin
                     if (mod.length > 2) {
-                        sides.top = convertToPixels(mod[0], context, fontSize);
-                        sides.bottom = convertToPixels(mod[2], context, fontSize);
+                        sides.top = convertToPixels(mod[0], context, 'height');
+                        sides.bottom = convertToPixels(mod[2], context, 'height');
                     }
                     else {
-                        sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, fontSize);
+                        sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, '*');
                     }
 
                     if (mod.length > 1) {
                         if (mod.length > 3) {
-                            sides.right = convertToPixels(mod[1], context, fontSize);
-                            sides.left = convertToPixels(mod[3], context, fontSize);
+                            sides.right = convertToPixels(mod[1], context, 'width');
+                            sides.left = convertToPixels(mod[3], context, 'width');
                         }
                         else {
-                            sides.right = sides.left = convertToPixels(mod[1], context, fontSize);
+                            sides.right = sides.left = convertToPixels(mod[1], context, 'width');
                         }
                     }
                 }
@@ -530,7 +528,10 @@
 
             SIDES.forEach(function (side) {
                 if (style.hasOwnProperty(prop + side)) {
-                    sides[side.toLowerCase()] = convertToPixels(style[prop + side].split(' ')[0], context, fontSize);
+                    sides[side.toLowerCase()] = convertToPixels(
+                        style[prop + side].split(' ')[0],
+                        context,
+                        side === 'Top' || side === 'Bottom' ? 'height' : 'width');
                 }
             });
 
@@ -580,10 +581,10 @@
     /**
      * Layout is a fixed or calculable number (ie. px, em, rem, %)
      */
-    function layoutIsFixed (value, context, fontSize) {
+    function layoutIsFixed (value, context, dim) {
         //return typeof value === 'number' || !isNaN(convertToPixels(value, context));
         //return value !== undefined && !isNaN(parseFloat(value))
-        return value !== undefined && !isNaN(convertToPixels(value, context, fontSize));
+        return value !== undefined && !isNaN(convertToPixels(value, context, dim));
     }
 
     /**
@@ -638,6 +639,12 @@
             else if (str.slice(str.length - 2) === 'vw') {
                 unit = 'vw';
             }
+            else if (str.slice(str.length - 2) === '%h') {
+                unit = '%h';
+            }
+            else if (str.slice(str.length - 2) === '%w') {
+                unit = '%w';
+            }
             else if (str.slice(str.length - 1) === '%') {
                 unit = '%';
             }
@@ -645,7 +652,6 @@
         return unit;
     }
 
-    var fontSizeBase;
     function getFontSizeBase () {
         if (fontSizeBase) {
             return fontSizeBase;
@@ -667,7 +673,7 @@
         return fontSizeBase;
     }
 
-    function convertToPixels (str, context, fontSize) {
+    function convertToPixels (str, context, dim) {
         if (isNumber(str)) {
             return str;
         }
@@ -677,10 +683,10 @@
             return parseFloat(str) * getFontSizeBase();
         }
         else if (unit === 'em') {
-            if (!fontSize) {
+            if (!context || !context.fontSize) {
                 console.warn('em used root font size (body), because it was not supplied the scoped font size.');
             }
-            return parseFloat(str) * (fontSize || getFontSizeBase());
+            return parseFloat(str) * (context ? (context.fontSize || getFontSizeBase()) : getFontSizeBase());
         }
         else if (unit === 'vh') {
             return getRootLayoutContext().height * (parseFloat(str) / 100);
@@ -688,12 +694,22 @@
         else if (unit === 'vw') {
             return getRootLayoutContext().width * (parseFloat(str) / 100);
         }
-        else if (unit === '%') {
+        else if (unit === '%' || unit === '%h' || unit === '%w') {
             if (context === undefined || context === null) {
                 return NaN;
             }
             else {
-                return context * (parseFloat(str) / 100);
+                var compareDim = dim;
+                if (unit === '%h') {
+                    compareDim = 'height';
+                }
+                else if (unit === '%w') {
+                    compareDim = 'width';
+                }
+                if (!compareDim) {
+                    return NaN;
+                }
+                return context[compareDim] * (parseFloat(str) / 100);
             }
         }
         else {
