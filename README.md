@@ -32,9 +32,9 @@ The following CSS is required for layout to work consistently:
               box-sizing: border-box;
     }
 
-Roadmap:
+## Roadmap
 
 - Detect Scrollbars to dynamically apply overflow and affect available dimensions
-- Layout Breakpoints
+- Layout Breakpoints: apply styles, font sizes, and rules based on dimensional ranges
 - Support Simple Calculations (50%-2rem)
 - Support Complex Variable & Decision-Based Calculations (layoutFontSize="w<5rem?0.5rem:1rem")
