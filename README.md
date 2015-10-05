@@ -69,9 +69,12 @@ The following CSS is required for layout to work consistently:
               box-sizing: border-box;
     }
 
-## Roadmap
+## Recently Added Features
 
 - Detect Scrollbars to dynamically apply overflow and affect available dimensions
+
+## Upcoming Features
+
 - ContextRelayMixin: Relay layout context from a non-layout component to a LayoutMixin child.
 - Layout Breakpoints: apply styles, font sizes, and rules based on dimensional ranges
 - Support Simple Calculations (50%-2rem)
