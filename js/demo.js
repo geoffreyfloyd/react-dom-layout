@@ -105,19 +105,15 @@
 	                ),
 	                React.createElement(
 	                    Layout,
-	                    { key: 'bottom', layoutHeight: '50%', style: { border: '1px solid black', overflowY: 'scroll' } },
-	                    React.createElement(
-	                        Layout,
-	                        { style: { height: '100vh' } },
-	                        range(1, 1000).map(function (content) {
-	                            return React.createElement(
-	                                'div',
-	                                { layoutHeight: '5em', layoutWidth: 'flex:5em:10em', style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
-	                                'Content ',
-	                                String(content)
-	                            );
-	                        })
-	                    )
+	                    { key: 'bottom', layoutHeight: '50%', style: { border: '1px solid black' } },
+	                    range(1, 1000).map(function (content) {
+	                        return React.createElement(
+	                            'div',
+	                            { layoutHeight: '5em', layoutWidth: 'flex:5em:10em', style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
+	                            'Content ',
+	                            String(content)
+	                        );
+	                    })
 	                )
 	            );
 	        }
@@ -20558,6 +20554,8 @@
 	    var PARENT_CONTEXT = ['border', 'padding'];
 	    var THIS_CONTEXT = ['margin'];
 	    var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
+	    var SCROLLBAR_WIDTH = 22;
+
 	    var fontSizeBase, getRootLayoutContext;
 
 	    var LayoutMixin = {
@@ -20585,8 +20583,16 @@
 	        /*************************************************************
 	         * RENDERING HELPERS
 	         *************************************************************/
-	        getParentContext: function getParentContext() {
+	        getParentContext: function getParentContext(correction) {
 	            var layoutContext = _Object$assign({}, this.getLayoutContext());
+
+	            if (correction) {
+	                DIMENSIONS.forEach(function (dim) {
+	                    if (layoutContext[dim] && correction[dim]) {
+	                        layoutContext[dim] -= correction[dim];
+	                    }
+	                });
+	            }
 
 	            if (this.props.style) {
 	                var sizeModifiers = getSizeModifiers(this.props.style, PARENT_CONTEXT, layoutContext);
@@ -20640,7 +20646,7 @@
 	            return layoutContext;
 	        },
 
-	        getLocalLayout: function getLocalLayout() {
+	        getLocalLayout: function getLocalLayout(correction) {
 	            var layoutContext, local;
 
 	            local = {};
@@ -20656,36 +20662,37 @@
 	                    }
 	                });
 	            }
+
+	            if (correction) {
+	                DIMENSIONS.forEach(function (dim) {
+	                    if (correction[dim] && local[dim]) {
+	                        local[dim] -= correction[dim];
+	                    }
+	                });
+	            }
+
 	            return local;
 	        },
 
-	        measureLayoutForChildren: function measureLayoutForChildren(children) {
-	            var parentLayout, precalc, childrenCount, shareWidth;
-	            parentLayout = this.getParentContext();
+	        measureLayoutForChildren: function measureLayoutForChildren(children, correction) {
+	            var parentLayout, layout;
+	            parentLayout = this.getParentContext(correction);
 	            guardLayoutContext(parentLayout);
 
 	            // wrap
 	            var newWrap = function newWrap(available) {
 	                return {
 	                    available: available,
-	                    rejected: 0,
-	                    layouts: [],
-	                    measures: [],
-	                    flexChildren: 0
+	                    elements: []
 	                };
 	            };
 
-	            precalc = DIMENSIONS.reduce(function (precalc, dim) {
-	                precalc[dim] = {
-	                    fixedSum: 0,
-	                    flexChildren: 0,
+	            layout = DIMENSIONS.reduce(function (lay, dim) {
+	                lay[dim] = {
 	                    wraps: [newWrap(parentLayout[dim])]
 	                };
-	                return precalc;
+	                return lay;
 	            }, {});
-
-	            childrenCount = 0;
-	            shareWidth = false;
 
 	            // Measure
 	            reactForEach(children, function (child) {
@@ -20694,8 +20701,6 @@
 	                    return;
 	                }
 
-	                childrenCount++;
-
 	                def = getLayoutDef(child);
 	                if (!def) {
 	                    return;
@@ -20703,92 +20708,86 @@
 
 	                DIMENSIONS.forEach(function (dim) {
 	                    // get currect wrap
-	                    var wrap = precalc[dim].wraps[precalc[dim].wraps.length - 1];
+	                    var wrap = layout[dim].wraps[layout[dim].wraps.length - 1];
 
+	                    var calculate = true;
 	                    var min = 1;
-	                    var flexChildren = 0;
 
 	                    if (layoutIsFixed(def[dim], parentLayout, dim)) {
 	                        // fixed is min
 	                        min = convertToPixels(def[dim], parentLayout, dim);
-
-	                        // deprecated
-	                        precalc[dim].fixedSum += min;
-	                        if (dim === 'width' && min < parentLayout[dim]) {
-	                            shareWidth = true;
-	                        }
+	                        calculate = false;
 	                    } else if (layoutIsFlex(def[dim])) {
 	                        // check for flex min
 	                        var flexParams = def[dim].split(':');
 	                        if (flexParams.length > 1 && flexParams[1] !== '') {
 	                            min = convertToPixels(flexParams[1], parentLayout, dim);
 	                        }
-	                        flexChildren++;
-
-	                        // deprecated
-	                        precalc[dim].flexChildren++;
-	                        if (dim === 'width') {
-	                            shareWidth = true;
-	                        }
 	                    } else if (def[dim] === 'inherit') {
 	                        min = parentLayout[dim];
+	                        calculate = false;
 	                    } else if (def[dim] === void 0 || def[dim] === 'omit') {
 	                        min = 0;
+	                        calculate = false;
 	                    }
 
 	                    // if we don't have enough space and at least one
 	                    // element has been layed out in this wrap, then
 	                    // it's time for a new wrap
-	                    if (wrap.layouts.length > 0 && wrap.available < min) {
+	                    if (wrap.elements.length > 0 && wrap.available < min) {
 	                        wrap = newWrap(parentLayout[dim]);
-	                        precalc[dim].wraps.push(wrap);
+	                        layout[dim].wraps.push(wrap);
 	                    }
 
-	                    // add measure and layout to the wrap
+	                    // add element to the wrap
 	                    wrap.available -= min;
-	                    wrap.measures.push(min);
-	                    wrap.layouts.push(def[dim]);
-	                    wrap.flexChildren += flexChildren;
+	                    wrap.elements.push({
+	                        arg: def[dim],
+	                        calculate: calculate,
+	                        measure: min
+	                    });
 	                });
 	            });
 
+	            var uncalculated = function uncalculated(item) {
+	                return item.calculate;
+	            };
+
 	            // second pass
 	            DIMENSIONS.forEach(function (dim) {
-	                precalc[dim].wraps.forEach(function (wrap) {
-	                    if (wrap.flexChildren > 0) {
-
+	                layout[dim].wraps.forEach(function (wrap) {
+	                    var uncalculatedElements = wrap.elements.filter(uncalculated).length;
+	                    if (uncalculatedElements > 0) {
 	                        // distribute (first pass)
-	                        var evenDistrib = wrap.available / wrap.flexChildren;
-	                        for (var i = 0; i < wrap.layouts.length; i++) {
-	                            if (layoutIsFlex(wrap.layouts[i])) {
-
-	                                var flexArgs = wrap.layouts[i].split(':');
-	                                if (flexArgs.length > 2 && flexArgs[2] !== '') {
-	                                    var max = convertToPixels(flexArgs[2], parentLayout, dim);
-	                                    if (max < evenDistrib + wrap.measures[i]) {
-	                                        wrap.flexChildren--;
-	                                        wrap.measures[i] += max - wrap.measures[i];
-	                                        wrap.available -= max - wrap.measures[i];
-	                                    } else {
-	                                        wrap.measures[i] += evenDistrib;
-	                                        wrap.available -= evenDistrib;
-	                                    }
+	                        var evenDistrib = wrap.available / uncalculatedElements;
+	                        wrap.elements.filter(uncalculated).forEach(function (element) {
+	                            var flexArgs = element.arg.split(':');
+	                            if (flexArgs.length > 2 && flexArgs[2] !== '') {
+	                                var max = convertToPixels(flexArgs[2], parentLayout, dim);
+	                                if (max < evenDistrib + element.measure) {
+	                                    element.measure += max - element.measure;
+	                                    wrap.available -= max - element.measure;
 	                                } else {
-	                                    wrap.measures[i] += evenDistrib;
+	                                    element.measure += evenDistrib;
 	                                    wrap.available -= evenDistrib;
+	                                    element.calculate = false;
 	                                }
+	                            } else {
+	                                element.measure += evenDistrib;
+	                                wrap.available -= evenDistrib;
+	                                element.calculate = false;
 	                            }
-	                        }
+	                        });
 
 	                        // second pass, if needed
-	                        if (wrap.flexChildren > 0 && wrap.available > 0.0) {
-	                            evenDistrib = wrap.available / wrap.flexChildren;
-	                            for (var i = 0; i < wrap.layouts.length; i++) {
-	                                if (layoutIsFlex(wrap.layouts[i])) {
-	                                    wrap.measures[i] += evenDistrib;
-	                                    wrap.available -= evenDistrib;
-	                                }
-	                            }
+	                        uncalculatedElements = wrap.elements.filter(uncalculated).length;
+	                        if (uncalculatedElements > 0 && wrap.available > 0.0) {
+	                            evenDistrib = wrap.available / uncalculatedElements;
+	                            wrap.elements.forEach(function (element) {
+	                                element.measure += evenDistrib;
+	                                wrap.available -= evenDistrib;
+	                                element.calculate = false;
+	                            });
 	                        }
 	                    }
 	                });
@@ -20798,17 +20797,24 @@
 	            // its children, and apply appropriate overflow and subtract scroll w/h
 
 	            var containerStyle = {};
-	            if (shareWidth && childrenCount > 1) {
+	            if (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps)) {
 	                containerStyle.display = 'flex';
-	                // todo: might add wrap prop only if sum of widths are detected to
-	                // be greater than the parent
+	            }
+
+	            if (needsWrap(layout.width.wraps)) {
 	                containerStyle.flexWrap = 'wrap';
+	            }
+
+	            var scrollbar = needsScrollbar(layout, parentLayout);
+	            if (scrollbar) {
+	                containerStyle.overflowY = 'scroll';
 	            }
 
 	            return {
 	                parentLayout: parentLayout,
-	                precalc: precalc,
-	                containerStyle: containerStyle
+	                layout: layout,
+	                containerStyle: containerStyle,
+	                needsScrollbar: scrollbar
 	            };
 	        },
 
@@ -20839,14 +20845,11 @@
 	                }
 
 	                DIMENSIONS.forEach(function (dim) {
-	                    var wrap = getWrap(childIndex, measure.precalc[dim].wraps);
-
-	                    if (layoutIsFixed(def[dim], measure.parentLayout, dim)) {
-	                        layout[dim] = wrap.measures[wrap.currentIndex];
-	                    } else if (layoutIsFlex(def[dim])) {
-	                        layout[dim] = wrap.measures[wrap.currentIndex];
-	                    } else if (layoutIsOmitted(def[dim])) {
+	                    if (layoutIsOmitted(def[dim])) {
 	                        delete layout[dim];
+	                    } else {
+	                        var wrap = getWrap(childIndex, measure.layout[dim].wraps);
+	                        layout[dim] = wrap.elements[wrap.currentIndex].measure;
 	                    }
 	                });
 
@@ -20917,6 +20920,10 @@
 	            var extraProps = {};
 
 	            var measure = this.measureLayoutForChildren(this.props.children);
+	            if (measure.needsScrollbar) {
+	                measure = this.measureLayoutForChildren(this.props.children, { width: SCROLLBAR_WIDTH });
+	            }
+
 	            extraProps.style = _Object$assign(style || {}, measure.containerStyle, this.getLocalLayout());
 	            extraProps.children = this.applyLayoutToChildren(this.props.children, measure);
 	            //extraProps.children = this.props.children;
@@ -20931,9 +20938,9 @@
 	        var wrap;
 	        var wrapsIndex = 0;
 	        while (!wrap && wrapsIndex < wraps.length) {
-	            if (wraps[wrapsIndex].layouts.length < index + 1) {
+	            if (wraps[wrapsIndex].elements.length < index + 1) {
 	                // move on to the next wrap
-	                index -= wraps[wrapsIndex].layouts.length;
+	                index -= wraps[wrapsIndex].elements.length;
 	                wrapsIndex++;
 	            } else {
 	                // add true childindex to wrap object
@@ -21122,9 +21129,53 @@
 	    //         );
 	    // };
 
+	    var needsFlex = function needsFlex(wraps) {
+	        for (var i = 0; i < wraps.length; i++) {
+	            if (wraps[i].elements.length > 1) {
+	                return true;
+	            }
+	        }
+	        return false;
+	    };
+
+	    var needsWrap = function needsWrap(wraps) {
+	        if (wraps.length > 1) {
+	            return true;
+	        }
+	        return false;
+	    };
+
+	    var needsScrollbar = function needsScrollbar(layout, parentLayout) {
+	        var containedHeight = parentLayout.height;
+	        var overallHeight = 0;
+	        var childIndex = 0;
+
+	        for (var i = 0; i < layout.width.wraps.length; i++) {
+	            var wrapHeight = 0;
+	            for (var j = 0; j < layout.width.wraps[i].elements.length; j++) {
+	                // update max height
+	                var heightWrap = getWrap(childIndex, layout.height.wraps);
+	                var heightElement = heightWrap.elements[heightWrap.currentIndex];
+	                if (heightElement.measure > wrapHeight) {
+	                    wrapHeight = heightElement.measure;
+	                }
+
+	                // up the child index
+	                childIndex++;
+	            }
+	            overallHeight += wrapHeight;
+	        }
+
+	        if (overallHeight > containedHeight) {
+	            return true;
+	        }
+
+	        return false;
+	    };
+
 	    function assert(value, name) {
 	        if (value === null) {
-	            throw new Error("missing " + name);
+	            throw new Error('missing ' + name);
 	        }
 	    }
 
@@ -21463,13 +21514,13 @@
 	         * browser layout issues. Scrolling overflow (when needed)
 	         * should be handled in a child layout.
 	         */
-	        getDefaultProps: function getDefaultProps() {
-	            return {
-	                style: {
-	                    overflow: 'hidden'
-	                }
-	            };
-	        },
+	        // getDefaultProps: function () {
+	        //     return {
+	        //         style: {
+	        //             overflow: 'hidden'
+	        //         }
+	        //     };
+	        // },
 
 	        /*************************************************************
 	         * COMPONENT LIFECYCLE
