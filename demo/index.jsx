@@ -34,12 +34,10 @@
                         </Layout>
                     </Layout>
                     {/* Bottom Half */}
-                    <Layout key="bottom" layoutHeight="50%" style={{ border: '1px solid black', overflowY: 'scroll' }}>
-                        <Layout style={{height: '100vh'}}>
-                            {range(1,1000).map(function (content) {
-                                return <div layoutHeight="5em" layoutWidth="flex:5em:10em" style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
-                            })}
-                        </Layout>
+                    <Layout key="bottom" layoutHeight="50%" style={{ border: '1px solid black' }}>
+                        {range(1,1000).map(function (content) {
+                            return <div layoutHeight="5em" layoutWidth="flex:5em:10em" style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
+                        })}
                     </Layout>
                 </WindowSizeLayout>
             );

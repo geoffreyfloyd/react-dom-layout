@@ -19,13 +19,13 @@
          * browser layout issues. Scrolling overflow (when needed)
          * should be handled in a child layout.
          */
-        getDefaultProps: function () {
-            return {
-                style: {
-                    overflow: 'hidden'
-                }
-            };
-        },
+        // getDefaultProps: function () {
+        //     return {
+        //         style: {
+        //             overflow: 'hidden'
+        //         }
+        //     };
+        // },
 
         /*************************************************************
          * COMPONENT LIFECYCLE
