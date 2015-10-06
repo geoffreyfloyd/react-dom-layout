@@ -59,15 +59,6 @@
                         fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : undefined
                     };
                 }
-
-                // set the font size for ems
-                if ((inherited && this.props && this.props.layoutFontSize) ||
-                    (this.props.style && this.props.style.fontSize))
-                {
-
-                    layoutContext.fontSize = convertToPixels(
-                        (this.props.style.fontSize || this.props.layoutFontSize), layoutContext);
-                }
             }
 
             if (this.props.style) {
@@ -155,6 +146,9 @@
                 return lay;
             }, {});
 
+            // additional styles from breakpoint
+            layout.styles = [];
+
             // Measure
             reactForEach(children, function (child) {
                 var childLayout;
@@ -162,10 +156,13 @@
                     return;
                 }
 
-                childLayout = getChildLayout(child);
+                childLayout = getChildLayout(child, parentLayout);
                 if (!childLayout) {
                     return;
                 }
+
+                // add style that may have been applied from breakpoint
+                layout.styles.push(childLayout.style || {});
 
                 DIMENSIONS.forEach(function (dim) {
                     // get currect wrap
@@ -260,9 +257,6 @@
                 });
             });
 
-            //TODO: detect when the parent container is not large enough for
-            // its children, and apply appropriate overflow and subtract scroll w/h
-
             var containerStyle = {};
             if (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps)) {
                 containerStyle.display = 'flex';
@@ -320,12 +314,11 @@
                     }
                 });
 
-                childIndex++;
-
                 if (isReactLayout(child)) {
                     // if it is a react layout then
                     // pass a layout context and
                     // allow it to set its own style props
+                    childIndex++;
                     return React.cloneElement(child, {
                         layoutContext: layout
                     });
@@ -337,21 +330,18 @@
                     // it can be passed on, however, do
                     // not set any styles
                     if (!hasLayout) {
+                        childIndex++;
                         return React.cloneElement(child, {
                             layoutContext: layout
                         });
                     }
 
-                    // don't pass fontsize layout context to
-                    // the style, it's already inherited by the parent
-                    var styleLayout = Object.assign({}, layout);
-                    if (styleLayout.fontSize) {
-                        delete styleLayout.fontSize;
-                    }
+                    var layoutStyle = Object.assign({}, layout);
+                    var breakpointStyle = measure.layout.styles[childIndex];
 
                     // resolve style
                     // we don't want min and max dims in our style
-                    var style = Object.assign({}, child.props.style, styleLayout);
+                    var style = Object.assign({}, child.props.style, layoutStyle, breakpointStyle);
                     var removeProps = ['minWidth', 'maxWidth', 'minHeight', 'maxHeight'];
                     removeProps.forEach(function (prop) {
                         if (style[prop]) {
@@ -372,6 +362,7 @@
                     // if it only has layoutWidth or layoutHeight props
                     // but is not a true layout component, then set the
                     // style
+                    childIndex++;
                     return React.cloneElement(child, {
                         layoutContext: layout,
                         style: style
@@ -454,7 +445,7 @@
         }
     }
 
-    function getChildLayout (component) {
+    function getChildLayout (component, context) {
         var defaultSetting, definition;
 
         if (!hasReactLayout(component)) {
@@ -478,6 +469,12 @@
         if (definition.width === null) {
             definition.width = defaultSetting;
         }
+
+        /**
+         * Apply breakpoint to definition
+         */
+        applyBreakpoints(component, definition, context, 'child');
+
         return definition;
     }
 

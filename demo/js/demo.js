@@ -57,6 +57,7 @@
 	         * RENDERING
 	         *************************************************************/
 	        render: function render() {
+	            var breakpoints = [{ trg: 'child', dim: 'width', min: '10rem', max: '15rem', ctx: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { trg: 'child', dim: 'width', min: '30rem', ctx: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }];
 	            return React.createElement(
 	                WindowSizeLayout,
 	                null,
@@ -65,14 +66,14 @@
 	                    { key: 'top', layoutHeight: '50%', style: { border: '10px solid black', borderRadius: '10px', margin: '5px', padding: '1em' } },
 	                    React.createElement(
 	                        Layout,
-	                        { key: 'top-left-left', layoutHeight: 'omit', layoutWidth: '50%', style: { border: '1px solid black', margin: '20px', overflowY: 'auto' } },
+	                        { key: 'top-left-left', layoutHeight: 'omit', layoutWidth: '50%', style: { border: '1px solid black', margin: '20px' } },
 	                        React.createElement(
 	                            Layout,
-	                            { key: 'top-left', layoutFontSize: '2rem', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px', overflowY: 'auto' } },
+	                            { key: 'top-left', layoutFontSize: '2rem', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
 	                            range(1, 15).map(function (content) {
 	                                return React.createElement(
 	                                    'div',
-	                                    { layoutWidth: 'flex:2.5em:5em', layoutBreakpoints: [{ dim: 'width', min: '2.5em', max: '4em', fontSize: '0.25em' }], style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
+	                                    { layoutWidth: 'flex:2.5rem:5rem', layoutBreakpoints: breakpoints, style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
 	                                    'Content ',
 	                                    String(content)
 	                                );
@@ -109,7 +110,7 @@
 	                    range(1, 1000).map(function (content) {
 	                        return React.createElement(
 	                            'div',
-	                            { layoutHeight: '5em', layoutWidth: 'flex:5em:10em', style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
+	                            { layoutHeight: '5em', layoutWidth: 'flex:5em:10em', style: { border: '1px solid black', margin: '5px' } },
 	                            'Content ',
 	                            String(content)
 	                        );
@@ -20603,12 +20604,6 @@
 	                        fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : void 0
 	                    };
 	                }
-
-	                // set the font size for ems
-	                if (inherited && this.props && this.props.layoutFontSize || this.props.style && this.props.style.fontSize) {
-
-	                    layoutContext.fontSize = convertToPixels(this.props.style.fontSize || this.props.layoutFontSize, layoutContext);
-	                }
 	            }
 
 	            if (this.props.style) {
@@ -20696,6 +20691,9 @@
 	                return lay;
 	            }, {});
 
+	            // additional styles from breakpoint
+	            layout.styles = [];
+
 	            // Measure
 	            reactForEach(children, function (child) {
 	                var childLayout;
@@ -20703,10 +20701,13 @@
 	                    return;
 	                }
 
-	                childLayout = getChildLayout(child);
+	                childLayout = getChildLayout(child, parentLayout);
 	                if (!childLayout) {
 	                    return;
 	                }
+
+	                // add style that may have been applied from breakpoint
+	                layout.styles.push(childLayout.style || {});
 
 	                DIMENSIONS.forEach(function (dim) {
 	                    // get currect wrap
@@ -20796,9 +20797,6 @@
 	                });
 	            });
 
-	            //TODO: detect when the parent container is not large enough for
-	            // its children, and apply appropriate overflow and subtract scroll w/h
-
 	            var containerStyle = {};
 	            if (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps)) {
 	                containerStyle.display = 'flex';
@@ -20855,12 +20853,11 @@
 	                    }
 	                });
 
-	                childIndex++;
-
 	                if (isReactLayout(child)) {
 	                    // if it is a react layout then
 	                    // pass a layout context and
 	                    // allow it to set its own style props
+	                    childIndex++;
 	                    return React.cloneElement(child, {
 	                        layoutContext: layout
 	                    });
@@ -20871,21 +20868,18 @@
 	                    // it can be passed on, however, do
 	                    // not set any styles
 	                    if (!hasLayout) {
+	                        childIndex++;
 	                        return React.cloneElement(child, {
 	                            layoutContext: layout
 	                        });
 	                    }
 
-	                    // don't pass fontsize layout context to
-	                    // the style, it's already inherited by the parent
-	                    var styleLayout = _Object$assign({}, layout);
-	                    if (styleLayout.fontSize) {
-	                        delete styleLayout.fontSize;
-	                    }
+	                    var layoutStyle = _Object$assign({}, layout);
+	                    var breakpointStyle = measure.layout.styles[childIndex];
 
 	                    // resolve style
 	                    // we don't want min and max dims in our style
-	                    var style = _Object$assign({}, child.props.style, styleLayout);
+	                    var style = _Object$assign({}, child.props.style, layoutStyle, breakpointStyle);
 	                    var removeProps = ['minWidth', 'maxWidth', 'minHeight', 'maxHeight'];
 	                    removeProps.forEach(function (prop) {
 	                        if (style[prop]) {
@@ -20906,6 +20900,7 @@
 	                    // if it only has layoutWidth or layoutHeight props
 	                    // but is not a true layout component, then set the
 	                    // style
+	                    childIndex++;
 	                    return React.cloneElement(child, {
 	                        layoutContext: layout,
 	                        style: style
@@ -20983,7 +20978,7 @@
 	        }
 	    }
 
-	    function getChildLayout(component) {
+	    function getChildLayout(component, context) {
 	        var defaultSetting, definition;
 
 	        if (!hasReactLayout(component)) {
@@ -21006,6 +21001,12 @@
 	        if (definition.width === null) {
 	            definition.width = defaultSetting;
 	        }
+
+	        /**
+	         * Apply breakpoint to definition
+	         */
+	        applyBreakpoints(component, definition, context, 'child');
+
 	        return definition;
 	    }
 
