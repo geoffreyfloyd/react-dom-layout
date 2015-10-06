@@ -20698,13 +20698,13 @@
 
 	            // Measure
 	            reactForEach(children, function (child) {
-	                var def;
+	                var childLayout;
 	                if (!child) {
 	                    return;
 	                }
 
-	                def = getChildLayout(child);
-	                if (!def) {
+	                childLayout = getChildLayout(child);
+	                if (!childLayout) {
 	                    return;
 	                }
 
@@ -20715,20 +20715,20 @@
 	                    var calculate = true;
 	                    var min = 1;
 
-	                    if (layoutIsFixed(def[dim], parentLayout, dim)) {
+	                    if (layoutIsFixed(childLayout[dim], parentLayout, dim)) {
 	                        // fixed is min
-	                        min = convertToPixels(def[dim], parentLayout, dim);
+	                        min = convertToPixels(childLayout[dim], parentLayout, dim);
 	                        calculate = false;
-	                    } else if (layoutIsFlex(def[dim])) {
+	                    } else if (layoutIsFlex(childLayout[dim])) {
 	                        // check for flex min
-	                        var flexParams = def[dim].split(':');
+	                        var flexParams = childLayout[dim].split(':');
 	                        if (flexParams.length > 1 && flexParams[1] !== '') {
 	                            min = convertToPixels(flexParams[1], parentLayout, dim);
 	                        }
-	                    } else if (def[dim] === 'inherit') {
+	                    } else if (childLayout[dim] === 'inherit') {
 	                        min = parentLayout[dim];
 	                        calculate = false;
-	                    } else if (def[dim] === void 0 || def[dim] === 'omit') {
+	                    } else if (childLayout[dim] === void 0 || childLayout[dim] === 'omit') {
 	                        min = 0;
 	                        calculate = false;
 	                    }
@@ -20744,7 +20744,7 @@
 	                    // add element to the wrap
 	                    wrap.available -= min;
 	                    wrap.elements.push({
-	                        arg: def[dim],
+	                        arg: childLayout[dim],
 	                        calculate: calculate,
 	                        measure: min
 	                    });
