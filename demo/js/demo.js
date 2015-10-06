@@ -20583,29 +20583,6 @@
 	        /*************************************************************
 	         * RENDERING HELPERS
 	         *************************************************************/
-	        getParentContext: function getParentContext(correction) {
-	            var layoutContext = _Object$assign({}, this.getLayoutContext());
-
-	            if (correction) {
-	                DIMENSIONS.forEach(function (dim) {
-	                    if (layoutContext[dim] && correction[dim]) {
-	                        layoutContext[dim] -= correction[dim];
-	                    }
-	                });
-	            }
-
-	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(this.props.style, PARENT_CONTEXT, layoutContext);
-	                DIMENSIONS.forEach(function (dim) {
-	                    if (layoutContext[dim]) {
-	                        layoutContext[dim] -= sizeModifiers[dim];
-	                    }
-	                });
-	            }
-
-	            return layoutContext;
-	        },
-
 	        getLayoutContext: function getLayoutContext() {
 	            var layoutContext = {};
 
@@ -20646,14 +20623,39 @@
 	            return layoutContext;
 	        },
 
-	        getLocalLayout: function getLocalLayout(correction) {
+	        getParentLayout: function getParentLayout(subtract) {
+	            var layoutContext = _Object$assign({}, this.getLayoutContext());
+
+	            if (subtract) {
+	                DIMENSIONS.forEach(function (dim) {
+	                    if (layoutContext[dim] && subtract[dim]) {
+	                        layoutContext[dim] -= subtract[dim];
+	                    }
+	                });
+	            }
+
+	            if (this.props.style) {
+	                var sizeModifiers = getSizeModifiers(this.props.style, PARENT_CONTEXT, layoutContext);
+	                DIMENSIONS.forEach(function (dim) {
+	                    if (layoutContext[dim]) {
+	                        layoutContext[dim] -= sizeModifiers[dim];
+	                    }
+	                });
+	            }
+
+	            return layoutContext;
+	        },
+
+	        /**
+	         * Return calculated style for component
+	         */
+	        getLocalLayout: function getLocalLayout(subtract) {
 	            var layoutContext, local;
 
 	            local = {};
 	            layoutContext = this.getLayoutContext();
 	            guardLayoutContext(layoutContext);
-	            //TODO: when should we use getLayoutDef over getLayoutContext?
-	            //var def = getLayoutDef(this);
+
 	            if (layoutContext) {
 	                local.fontSize = layoutContext.fontSize;
 	                DIMENSIONS.forEach(function (dim) {
@@ -20663,10 +20665,10 @@
 	                });
 	            }
 
-	            if (correction) {
+	            if (subtract) {
 	                DIMENSIONS.forEach(function (dim) {
-	                    if (correction[dim] && local[dim]) {
-	                        local[dim] -= correction[dim];
+	                    if (subtract[dim] && local[dim]) {
+	                        local[dim] -= subtract[dim];
 	                    }
 	                });
 	            }
@@ -20674,9 +20676,9 @@
 	            return local;
 	        },
 
-	        measureLayoutForChildren: function measureLayoutForChildren(children, correction) {
+	        measureLayoutForChildren: function measureLayoutForChildren(children, subtract) {
 	            var parentLayout, layout;
-	            parentLayout = this.getParentContext(correction);
+	            parentLayout = this.getParentLayout(subtract);
 	            guardLayoutContext(parentLayout);
 
 	            // wrap
@@ -20701,7 +20703,7 @@
 	                    return;
 	                }
 
-	                def = getLayoutDef(child);
+	                def = getChildLayout(child);
 	                if (!def) {
 	                    return;
 	                }
@@ -20767,6 +20769,7 @@
 	                                if (max < evenDistrib + element.measure) {
 	                                    element.measure += max - element.measure;
 	                                    wrap.available -= max - element.measure;
+	                                    element.calculate = false;
 	                                } else {
 	                                    element.measure += evenDistrib;
 	                                    wrap.available -= evenDistrib;
@@ -20832,24 +20835,17 @@
 	                }
 
 	                layout = _Object$assign({}, measure.parentLayout);
-	                def = getLayoutDef(child);
 
-	                // child has no layout props,
-	                // do not modify it
-	                if (!def) {
-	                    //return child;
-	                    childIndex++;
-	                    return React.cloneElement(child, {
-	                        layoutContext: layout
-	                    });
-	                }
-
+	                var hasLayout = false;
 	                DIMENSIONS.forEach(function (dim) {
-	                    if (layoutIsOmitted(def[dim])) {
-	                        delete layout[dim];
-	                    } else {
-	                        var wrap = getWrap(childIndex, measure.layout[dim].wraps);
-	                        layout[dim] = wrap.elements[wrap.currentIndex].measure;
+	                    var wrap = getWrap(childIndex, measure.layout[dim].wraps);
+	                    if (wrap) {
+	                        hasLayout = true;
+	                        if (layoutIsOmitted(wrap.elements[wrap.currentIndex].arg)) {
+	                            delete layout[dim];
+	                        } else {
+	                            layout[dim] = wrap.elements[wrap.currentIndex].measure;
+	                        }
 	                    }
 	                });
 
@@ -20863,6 +20859,16 @@
 	                        layoutContext: layout
 	                    });
 	                } else {
+
+	                    // if it didn't have a layout at all
+	                    // then only pass the context so that
+	                    // it can be passed on, however, do
+	                    // not set any styles
+	                    if (!hasLayout) {
+	                        return React.cloneElement(child, {
+	                            layoutContext: layout
+	                        });
+	                    }
 
 	                    // don't pass fontsize layout context to
 	                    // the style, it's already inherited by the parent
@@ -20954,34 +20960,30 @@
 	    function reactForEach(children, func) {
 	        if (Array.isArray(children)) {
 	            children.forEach(func);
+	        } else if (React.isValidElement(children)) {
+	            func(children);
+	        } else {
+	            React.Children.forEach(children, func);
 	        }
-	        // else if (children instanceof React.ReactElement) {
-	        //     func(children);
-	        // }
-	        else {
-	                React.Children.forEach(children, func);
-	            }
 	    }
 
 	    function reactMap(children, func) {
 	        if (Array.isArray(children)) {
 	            return children.map(func);
+	        } else if (React.isValidElement(children)) {
+	            return func(children);
+	        } else {
+	            return React.Children.map(children, func);
 	        }
-	        // else if (children instanceof React.ReactElement) {
-	        //     return func(children);
-	        // }
-	        else {
-	                return React.Children.map(children, func);
-	            }
 	    }
 
-	    function getLayoutDef(component) {
+	    function getChildLayout(component) {
 	        var defaultSetting, definition;
 
 	        if (!hasReactLayout(component)) {
 	            // hold your horses, we're not giving up on laying out this
 	            // component just yet, let's check the style props
-	            return getLayoutDefFromStyle(component);
+	            return getChildLayoutFromStyle(component);
 	        }
 	        if (isReactLayout(component)) {
 	            defaultSetting = 'inherit';
@@ -21001,7 +21003,34 @@
 	        return definition;
 	    }
 
-	    function getLayoutDefFromStyle(component) {
+	    function applyBreakpoints(component, definition, context, target) {
+	        // apply breakpoint layout
+	        if (component.props && component.props.layoutBreakpoints && component.props.layoutBreakpoints.length) {
+	            component.props.layoutBreakpoints.filter(function (bp) {
+	                return bp.trg === target;
+	            }).forEach(function (breakpoint) {
+	                var min = convertToPixels(breakpoint.min || '0px', context, breakpoint.dim);
+	                var max = convertToPixels(breakpoint.max || '100%', context, breakpoint.dim);
+
+	                // test range of breakpoint
+	                if (context[breakpoint.dim] >= min && max >= context[breakpoint.dim]) {
+	                    // apply pixel conversions if target is parent
+	                    if (target === 'parent') {
+	                        CONTEXT_PROPS.forEach(function (prop) {
+	                            if (breakpoint.ctx.hasOwnProperty(prop)) {
+	                                breakpoint.ctx[prop] = convertToPixels(breakpoint.ctx[prop], context, breakpoint.dim);
+	                            }
+	                        });
+	                    }
+
+	                    // apply breakpoint to layout context
+	                    _Object$assign(definition, breakpoint.ctx);
+	                }
+	            });
+	        }
+	    }
+
+	    function getChildLayoutFromStyle(component) {
 	        if (component.props && component.props.style) {
 	            var style = component.props.style;
 	            var definition = {};
