@@ -20824,16 +20824,22 @@
 	        applyLayoutToChildren: function applyLayoutToChildren(children, measure) {
 	            var childIndex = 0;
 	            var processChild = function processChild(child) {
-	                var def, layout;
+
+	                // TODO: If child has no props then just return the child.. but why?
 	                if (!(child !== void 0 && child !== null ? child.props : void 0)) {
-	                    childIndex++;
-	                    return child;
-	                }
-	                if (child.props.ref !== void 0 && child.props.ref !== null) {
+	                    debugger;
 	                    childIndex++;
 	                    return child;
 	                }
 
+	                // TODO: Figure out what happens when a ref child is cloned
+	                if (child.props.ref !== void 0 && child.props.ref !== null) {
+	                    debugger;
+	                    childIndex++;
+	                    return child;
+	                }
+
+	                var layout;
 	                layout = _Object$assign({}, measure.parentLayout);
 
 	                var hasLayout = false;
