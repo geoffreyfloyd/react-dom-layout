@@ -544,6 +544,10 @@
                 definition.height = 'flex:' + (style.minHeight || '') + ':' + (style.maxHeight || '');
             }
 
+            if (style.fontSize) {
+                definition.fontSize = style.fontSize;
+            }
+            
             if (definition.height || definition.width) {
                 return definition;
             }
