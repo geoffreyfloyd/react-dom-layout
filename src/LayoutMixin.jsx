@@ -233,28 +233,28 @@
                             if (flexArgs.length > 2 && flexArgs[2] !== '') {
                                 var max = convertToPixels(flexArgs[2], parentLayout, dim);
                                 if (max < evenDistrib + element.measure) {
-                                    element.measure += (max - element.measure);
-                                    wrap.available -= (max - element.measure);
+                                    var maxAvail = max - element.measure;
+                                    element.measure += maxAvail;
+                                    wrap.available -= maxAvail;
                                     element.calculate = false;
                                 }
                                 else {
                                     element.measure += evenDistrib;
                                     wrap.available -= evenDistrib;
-                                    element.calculate = false;
                                 }
                             }
                             else {
                                 element.measure += evenDistrib;
                                 wrap.available -= evenDistrib;
-                                element.calculate = false;
                             }
                         });
 
-                        // second pass, if needed
+                        // assign the rest of available space to items that can
+                        // still flex
                         uncalculatedElements = wrap.elements.filter(uncalculated).length;
                         if (uncalculatedElements > 0 && wrap.available > 0.0) {
                             evenDistrib = wrap.available / uncalculatedElements;
-                            wrap.elements.forEach(function (element) {
+                            wrap.elements.filter(uncalculated).forEach(function (element) {
                                 element.measure += evenDistrib;
                                 wrap.available -= evenDistrib;
                                 element.calculate = false;

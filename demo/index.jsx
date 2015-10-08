@@ -13,7 +13,7 @@
          *************************************************************/
         render: function () {
             var breakpoints = [
-                { trg: 'child', dim: 'width', min: '10rem', max: '15rem', ctx: {width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red'}}},
+                { trg: 'child', dim: 'width', max: '15rem', ctx: {width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red'}}},
                 { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: {width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green'}}},
                 { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: {width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue'}}},
                 { trg: 'child', dim: 'width', min: '30rem', ctx: {width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple'}}},

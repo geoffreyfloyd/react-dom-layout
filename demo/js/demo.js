@@ -57,7 +57,7 @@
 	         * RENDERING
 	         *************************************************************/
 	        render: function render() {
-	            var breakpoints = [{ trg: 'child', dim: 'width', min: '10rem', max: '15rem', ctx: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { trg: 'child', dim: 'width', min: '30rem', ctx: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { trg: 'parent', dim: 'width', ctx: { style: { fontSize: '0.75rem', color: 'orange' } } }];
+	            var breakpoints = [{ trg: 'child', dim: 'width', max: '15rem', ctx: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { trg: 'child', dim: 'width', min: '30rem', ctx: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { trg: 'parent', dim: 'width', ctx: { style: { fontSize: '0.75rem', color: 'orange' } } }];
 	            return React.createElement(
 	                WindowSizeLayout,
 	                null,
@@ -20538,8 +20538,8 @@
 	})(function (React) {
 	    // many thanks to https://github.com/jsdf/react-layout for base of layout logic
 	    var DIMENSIONS = ['height', 'width'];
-	    var PARENT_CONTEXT = ['border', 'padding'];
-	    var THIS_CONTEXT = ['margin'];
+	    var INNER_MODIFIERS = ['border', 'padding'];
+	    var OUTER_MODIFIERS = ['margin'];
 	    var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
 	    var SCROLLBAR_WIDTH = 22;
 
@@ -20593,7 +20593,7 @@
 	            }
 
 	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(this.props.style, THIS_CONTEXT, layoutContext);
+	                var sizeModifiers = getSizeModifiers(this.props.style, OUTER_MODIFIERS, layoutContext);
 	                DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
 	                        layoutContext[dim] -= sizeModifiers[dim];
@@ -20616,7 +20616,7 @@
 	            }
 
 	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(this.props.style, PARENT_CONTEXT, layoutContext);
+	                var sizeModifiers = getSizeModifiers(this.props.style, INNER_MODIFIERS, layoutContext);
 	                DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
 	                        layoutContext[dim] -= sizeModifiers[dim];
@@ -20761,26 +20761,26 @@
 	                            if (flexArgs.length > 2 && flexArgs[2] !== '') {
 	                                var max = convertToPixels(flexArgs[2], parentLayout, dim);
 	                                if (max < evenDistrib + element.measure) {
-	                                    element.measure += max - element.measure;
-	                                    wrap.available -= max - element.measure;
+	                                    var maxAvail = max - element.measure;
+	                                    element.measure += maxAvail;
+	                                    wrap.available -= maxAvail;
 	                                    element.calculate = false;
 	                                } else {
 	                                    element.measure += evenDistrib;
 	                                    wrap.available -= evenDistrib;
-	                                    element.calculate = false;
 	                                }
 	                            } else {
 	                                element.measure += evenDistrib;
 	                                wrap.available -= evenDistrib;
-	                                element.calculate = false;
 	                            }
 	                        });
 
-	                        // second pass, if needed
+	                        // assign the rest of available space to items that can
+	                        // still flex
 	                        uncalculatedElements = wrap.elements.filter(uncalculated).length;
 	                        if (uncalculatedElements > 0 && wrap.available > 0.0) {
 	                            evenDistrib = wrap.available / uncalculatedElements;
-	                            wrap.elements.forEach(function (element) {
+	                            wrap.elements.filter(uncalculated).forEach(function (element) {
 	                                element.measure += evenDistrib;
 	                                wrap.available -= evenDistrib;
 	                                element.calculate = false;
@@ -20883,7 +20883,7 @@
 	                    // non-layout components need to account for margin
 	                    // because it won't get it's own render pass to call
 	                    // getLayoutContext, which accounts for margin
-	                    var sizeModifiers = getSizeModifiers(style, THIS_CONTEXT, measure.parentLayout);
+	                    var sizeModifiers = getSizeModifiers(style, OUTER_MODIFIERS, measure.parentLayout);
 	                    DIMENSIONS.forEach(function (dim) {
 	                        if (style[dim]) {
 	                            style[dim] -= sizeModifiers[dim];
