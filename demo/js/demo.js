@@ -20593,7 +20593,7 @@
 	            }
 
 	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(this.props.style, OUTER_MODIFIERS, layoutContext);
+	                var sizeModifiers = getSizeModifiers(reduceStyle(this.props.style), OUTER_MODIFIERS, layoutContext);
 	                DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
 	                        layoutContext[dim] -= sizeModifiers[dim];
@@ -20616,7 +20616,7 @@
 	            }
 
 	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(this.props.style, INNER_MODIFIERS, layoutContext);
+	                var sizeModifiers = getSizeModifiers(reduceStyle(this.props.style), INNER_MODIFIERS, layoutContext);
 	                DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
 	                        layoutContext[dim] -= sizeModifiers[dim];
@@ -20886,7 +20886,7 @@
 
 	                    // resolve style
 	                    // we don't want min and max dims in our style
-	                    var style = _Object$assign({}, child.props.style, layoutStyle, breakpointStyle);
+	                    var style = _Object$assign({}, reduceStyle(child.props.style), layoutStyle, breakpointStyle);
 	                    var removeProps = ['minWidth', 'maxWidth', 'minHeight', 'maxHeight'];
 	                    removeProps.forEach(function (prop) {
 	                        if (style[prop]) {
@@ -21047,7 +21047,7 @@
 
 	    function getChildLayoutFromStyle(component) {
 	        if (component.props && component.props.style) {
-	            var style = component.props.style;
+	            var style = reduceStyle(component.props.style);
 	            var definition = {};
 	            if (style.width) {
 	                definition.width = style.width;
@@ -21304,6 +21304,18 @@
 	            }
 	        } else {
 	            return parseFloat(str);
+	        }
+	    }
+
+	    function reduceStyle(style) {
+	        if (Array.isArray(style)) {
+	            var reduce = {};
+	            style.forEach(function (s) {
+	                _Object$assign(reduce, reduceStyle(s));
+	            });
+	            return reduce;
+	        } else {
+	            return style;
 	        }
 	    }
 
