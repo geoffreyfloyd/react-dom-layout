@@ -5,8 +5,8 @@
 }(function (React) {
     // many thanks to https://github.com/jsdf/react-layout for base of layout logic
     var DIMENSIONS = ['height', 'width'];
-    var PARENT_CONTEXT = ['border', 'padding'];
-    var THIS_CONTEXT = ['margin'];
+    var INNER_MODIFIERS = ['border', 'padding'];
+    var OUTER_MODIFIERS = ['margin'];
     var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
     var SCROLLBAR_WIDTH = 22;
 
@@ -62,7 +62,7 @@
             }
 
             if (this.props.style) {
-                var sizeModifiers = getSizeModifiers(this.props.style, THIS_CONTEXT, layoutContext);
+                var sizeModifiers = getSizeModifiers(this.props.style, OUTER_MODIFIERS, layoutContext);
                 DIMENSIONS.forEach(function (dim) {
                     if (layoutContext[dim]) {
                         layoutContext[dim] -= sizeModifiers[dim];
@@ -85,7 +85,7 @@
             }
 
             if (this.props.style) {
-                var sizeModifiers = getSizeModifiers(this.props.style, PARENT_CONTEXT, layoutContext);
+                var sizeModifiers = getSizeModifiers(this.props.style, INNER_MODIFIERS, layoutContext);
                 DIMENSIONS.forEach(function (dim) {
                     if (layoutContext[dim]) {
                         layoutContext[dim] -= sizeModifiers[dim];
@@ -121,6 +121,13 @@
                         local[dim] -= subtract[dim];
                     }
                 });
+            }
+
+            var breakpoint = {};
+            applyBreakpoints(this, breakpoint, local, 'parent');
+
+            if (breakpoint.style) {
+                Object.assign(local, breakpoint.style);
             }
 
             return local;
@@ -352,7 +359,7 @@
                     // non-layout components need to account for margin
                     // because it won't get it's own render pass to call
                     // getLayoutContext, which accounts for margin
-                    var sizeModifiers = getSizeModifiers(style, THIS_CONTEXT, measure.parentLayout);
+                    var sizeModifiers = getSizeModifiers(style, OUTER_MODIFIERS, measure.parentLayout);
                     DIMENSIONS.forEach(function (dim) {
                         if (style[dim]) {
                             style[dim] -= sizeModifiers[dim];

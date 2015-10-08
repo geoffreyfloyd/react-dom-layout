@@ -16,22 +16,19 @@
                 { trg: 'child', dim: 'width', min: '10rem', max: '15rem', ctx: {width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red'}}},
                 { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: {width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green'}}},
                 { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: {width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue'}}},
-                { trg: 'child', dim: 'width', min: '30rem', ctx: {width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple'}}}
+                { trg: 'child', dim: 'width', min: '30rem', ctx: {width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple'}}},
+                { trg: 'parent', dim: 'width', ctx: {style: { fontSize: '0.75rem', color: 'orange'}}},
             ];
             return (
                 <WindowSizeLayout>
                     {/* Top Half */}
                     <Layout key="top" layoutHeight="50%" style={{ border: '10px solid black', borderRadius: '10px', margin: '5px', padding: '1em' }}>
                         {/* Top Left */}
-                        <Layout key="top-left-left" layoutHeight="omit" layoutWidth="50%" style={{ border: '1px solid black', margin: '20px' }}>
-                            <Layout key="top-left" layoutFontSize="2rem" layoutWidth="flex:10rem" style={{ border: '1px solid black', margin: '5px' }}>
+                        <Layout key="top-left" layoutHeight="omit" layoutWidth="50%" style={{ border: '1px solid black', margin: '20px' }}>
+                            <Layout key="top-left-inner" layoutFontSize="2rem" layoutWidth="flex:10rem" style={{ border: '1px solid black', margin: '5px' }}>
                                 {range(1,15).map(function (content) {
                                     return <div layoutWidth="flex:2.5rem:5rem" layoutBreakpoints={breakpoints} style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
                                 })}
-                            </Layout>
-                            <Layout key="top-left-right" layoutWidth="flex:20rem" style={{ border: '1px solid black', margin: '5px' }}>
-                                <div key="top-left-c" layoutWidth="flex:10rem" style={{border: '1px solid black', margin: '5px'}}>Content 1.C</div>
-                                <div key="top-left-d" layoutWidth="flex:10rem" style={{border: '1px solid black', margin: '5px'}}>Content 1.D</div>
                             </Layout>
                         </Layout>
                         {/* Top Right */}

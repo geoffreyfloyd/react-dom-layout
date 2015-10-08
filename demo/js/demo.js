@@ -57,7 +57,7 @@
 	         * RENDERING
 	         *************************************************************/
 	        render: function render() {
-	            var breakpoints = [{ trg: 'child', dim: 'width', min: '10rem', max: '15rem', ctx: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { trg: 'child', dim: 'width', min: '30rem', ctx: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }];
+	            var breakpoints = [{ trg: 'child', dim: 'width', min: '10rem', max: '15rem', ctx: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { trg: 'child', dim: 'width', min: '30rem', ctx: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { trg: 'parent', dim: 'width', ctx: { style: { fontSize: '0.75rem', color: 'orange' } } }];
 	            return React.createElement(
 	                WindowSizeLayout,
 	                null,
@@ -66,10 +66,10 @@
 	                    { key: 'top', layoutHeight: '50%', style: { border: '10px solid black', borderRadius: '10px', margin: '5px', padding: '1em' } },
 	                    React.createElement(
 	                        Layout,
-	                        { key: 'top-left-left', layoutHeight: 'omit', layoutWidth: '50%', style: { border: '1px solid black', margin: '20px' } },
+	                        { key: 'top-left', layoutHeight: 'omit', layoutWidth: '50%', style: { border: '1px solid black', margin: '20px' } },
 	                        React.createElement(
 	                            Layout,
-	                            { key: 'top-left', layoutFontSize: '2rem', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
+	                            { key: 'top-left-inner', layoutFontSize: '2rem', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
 	                            range(1, 15).map(function (content) {
 	                                return React.createElement(
 	                                    'div',
@@ -78,20 +78,6 @@
 	                                    String(content)
 	                                );
 	                            })
-	                        ),
-	                        React.createElement(
-	                            Layout,
-	                            { key: 'top-left-right', layoutWidth: 'flex:20rem', style: { border: '1px solid black', margin: '5px' } },
-	                            React.createElement(
-	                                'div',
-	                                { key: 'top-left-c', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
-	                                'Content 1.C'
-	                            ),
-	                            React.createElement(
-	                                'div',
-	                                { key: 'top-left-d', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
-	                                'Content 1.D'
-	                            )
 	                        )
 	                    ),
 	                    React.createElement(
@@ -20666,6 +20652,13 @@
 	                        local[dim] -= subtract[dim];
 	                    }
 	                });
+	            }
+
+	            var breakpoint = {};
+	            applyBreakpoints(this, breakpoint, local, 'parent');
+
+	            if (breakpoint.style) {
+	                _Object$assign(local, breakpoint.style);
 	            }
 
 	            return local;
