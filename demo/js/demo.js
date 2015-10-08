@@ -20690,40 +20690,48 @@
 	            // Measure
 	            reactForEach(children, function (child) {
 	                var childLayout;
-	                if (!child) {
+
+	                if (child) {
+	                    childLayout = getChildLayout(child, parentLayout);
+
+	                    if (childLayout) {
+	                        // add style that may have been applied from breakpoint
+	                        layout.styles.push(childLayout.style || {});
+	                    } else {
+	                        return;
+	                    }
+	                } else {
 	                    return;
 	                }
-
-	                childLayout = getChildLayout(child, parentLayout);
-	                if (!childLayout) {
-	                    return;
-	                }
-
-	                // add style that may have been applied from breakpoint
-	                layout.styles.push(childLayout.style || {});
 
 	                DIMENSIONS.forEach(function (dim) {
 	                    // get currect wrap
 	                    var wrap = layout[dim].wraps[layout[dim].wraps.length - 1];
 
+	                    var arg;
 	                    var calculate = true;
+	                    var fontSize = childLayout && childLayout.fontSize ? convertToPixels(childLayout.fontSize, parentLayout, dim) : parentLayout.fontSize;
 	                    var min = 1;
 
-	                    if (layoutIsFixed(childLayout[dim], parentLayout, dim)) {
+	                    if (!child || !childLayout || childLayout[dim] === void 0 || childLayout[dim] === 'omit') {
+	                        arg = childLayout ? childLayout[dim] : void 0;
+	                        min = 0;
+	                        calculate = false;
+	                    } else if (layoutIsFixed(childLayout[dim], parentLayout, dim)) {
 	                        // fixed is min
+	                        arg = childLayout[dim];
 	                        min = convertToPixels(childLayout[dim], parentLayout, dim);
 	                        calculate = false;
 	                    } else if (layoutIsFlex(childLayout[dim])) {
 	                        // check for flex min
+	                        arg = childLayout[dim];
 	                        var flexParams = childLayout[dim].split(':');
 	                        if (flexParams.length > 1 && flexParams[1] !== '') {
 	                            min = convertToPixels(flexParams[1], parentLayout, dim);
 	                        }
 	                    } else if (childLayout[dim] === 'inherit') {
+	                        arg = childLayout[dim];
 	                        min = parentLayout[dim];
-	                        calculate = false;
-	                    } else if (childLayout[dim] === void 0 || childLayout[dim] === 'omit') {
-	                        min = 0;
 	                        calculate = false;
 	                    }
 
@@ -20738,8 +20746,9 @@
 	                    // add element to the wrap
 	                    wrap.available -= min;
 	                    wrap.elements.push({
-	                        arg: childLayout[dim],
+	                        arg: arg,
 	                        calculate: calculate,
+	                        fontSize: fontSize,
 	                        measure: min
 	                    });
 	                });
@@ -20838,6 +20847,11 @@
 	                    var wrap = getWrap(childIndex, measure.layout[dim].wraps);
 	                    if (wrap) {
 	                        hasLayout = true;
+	                        // Apply fontSizeBase
+	                        if (wrap.elements[wrap.currentIndex].fontSize) {
+	                            layout.fontSize = wrap.elements[wrap.currentIndex].fontSize;
+	                        }
+	                        // Apply dimension
 	                        if (layoutIsOmitted(wrap.elements[wrap.currentIndex].arg)) {
 	                            delete layout[dim];
 	                        } else {
@@ -20986,7 +21000,8 @@
 	        }
 	        definition = {
 	            height: component.props.layoutHeight,
-	            width: component.props.layoutWidth
+	            width: component.props.layoutWidth,
+	            fontSize: component.props.layoutFontSize
 	        };
 	        if (definition.height === null) {
 	            definition.height = defaultSetting;
