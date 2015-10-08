@@ -56,7 +56,7 @@ When a react component is not itself a LayoutMixin, but contains a LayoutMixin c
 
 npm install --save https://github.com/geoffreyfloyd/react-dom-layout.git#master
 
-Check out the demo for a self-explanatory example of our to use the components:
+Check out the demo for a self-explanatory example of how to use the components:
 http://geoffreyfloyd.github.io/react-dom-layout/
 
 The following CSS is required for layout to work consistently:
