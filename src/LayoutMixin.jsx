@@ -416,7 +416,7 @@
                 measure = this.measureLayoutForChildren(this.props.children, {width: SCROLLBAR_WIDTH});
             }
 
-            extraProps.style = Object.assign(style || {}, measure.containerStyle, this.getLocalLayout());
+            extraProps.style = Object.assign(reduceStyle(style) || {}, measure.containerStyle, this.getLocalLayout());
             extraProps.children = this.applyLayoutToChildren(this.props.children, measure);
             //extraProps.children = this.props.children;
             return component(Object.assign(this.props, extraProps));
