@@ -20804,17 +20804,22 @@
 	            });
 
 	            var containerStyle = {};
-	            if (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps)) {
+	            if (getLayoutOptions(this).allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
 	                containerStyle.display = 'flex';
-	            }
-
-	            if (needsWrap(layout.width.wraps)) {
 	                containerStyle.flexWrap = 'wrap';
 	            }
 
+	            // if (getLayoutOptions(this).allowFlex && needsWrap(layout.width.wraps)) {
+	            //
+	            // }
+
 	            var scrollbar = needsScrollbar(layout, parentLayout);
 	            if (scrollbar) {
-	                containerStyle.overflowY = 'scroll';
+	                if (getLayoutOptions(this).allowScrollbar) {
+	                    containerStyle.overflowY = 'scroll';
+	                } else {
+	                    containerStyle.overflowY = 'hidden';
+	                }
 	            }
 
 	            return {
@@ -20829,7 +20834,7 @@
 	            var childIndex = 0;
 	            var processChild = function processChild(child) {
 
-	                // TODO: If child has no props then just return the child.. but why?
+	                // child is simply a string (which will later be converted to a span)
 	                if (!(child !== void 0 && child !== null ? child.props : void 0)) {
 	                    childIndex++;
 	                    return child;
@@ -21043,9 +21048,6 @@
 	                definition = _Object$assign({}, getChildLayoutFromStyle(component), definition);
 	            } else {
 	                return getChildLayoutFromStyle(component);
-	                if (!definition) {
-	                    return;
-	                }
 	            }
 	        }
 
@@ -21179,9 +21181,18 @@
 	    /**
 	     * Returns truthy object (treat undefined as false)
 	     */
-	    function hasReactLayout(component) {
-	        return (component.props !== void 0 && component.props !== null ? component.props.layoutHeight : void 0) || (component.props !== void 0 && component.props !== null ? component.props.layoutWidth : void 0) || (component.constructor !== void 0 && component.constructor !== null ? component.constructor.hasReactLayout : void 0) || (component.type !== void 0 && component.type !== null ? component.type.hasReactLayout : void 0);
-	    }
+	    // function hasReactLayout (component) {
+	    //     return (
+	    //         (component.props !== undefined && component.props !== null ?
+	    //             component.props.layoutHeight : undefined) ||
+	    //         (component.props !== undefined && component.props !== null ?
+	    //             component.props.layoutWidth : undefined) ||
+	    //         (component.constructor !== undefined && component.constructor !== null ?
+	    //             component.constructor.hasReactLayout : undefined) ||
+	    //         (component.type !== undefined && component.type !== null ?
+	    //             component.type.hasReactLayout : undefined)
+	    //     );
+	    // }
 
 	    /**
 	     * Returns truthy object (treat undefined as false)
@@ -21234,10 +21245,6 @@
 
 	    var unmanaged = function unmanaged(element) {
 	        return element.measure === 0;
-	    };
-
-	    var managed = function managed(element) {
-	        return element.measure !== 0;
 	    };
 
 	    var needsWrap = function needsWrap(wraps) {
@@ -21331,6 +21338,18 @@
 	            }
 	        }
 	        return fontSizeBase;
+	    }
+
+	    function getLayoutOptions(component) {
+	        var defaults = {
+	            allowScrollbar: true,
+	            allowFlex: true
+	        };
+	        if (component.props && component.props.layoutOptions) {
+	            _Object$assign(defaults, component.props.layoutOptions);
+	        }
+
+	        return defaults;
 	    }
 
 	    function convertToPixels(str, context, dim) {

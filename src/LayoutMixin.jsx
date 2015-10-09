@@ -279,17 +279,23 @@
             });
 
             var containerStyle = {};
-            if (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps)) {
+            if (getLayoutOptions(this).allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
                 containerStyle.display = 'flex';
-            }
-
-            if (needsWrap(layout.width.wraps)) {
                 containerStyle.flexWrap = 'wrap';
             }
 
+            // if (getLayoutOptions(this).allowFlex && needsWrap(layout.width.wraps)) {
+            //
+            // }
+
             var scrollbar = needsScrollbar(layout, parentLayout);
             if (scrollbar) {
-                containerStyle.overflowY = 'scroll';
+                if (getLayoutOptions(this).allowScrollbar) {
+                    containerStyle.overflowY = 'scroll';
+                }
+                else {
+                    containerStyle.overflowY = 'hidden';
+                }
             }
 
             return {
@@ -304,7 +310,7 @@
             var childIndex = 0;
             var processChild = function (child) {
 
-                // TODO: If child has no props then just return the child.. but why?
+                // child is simply a string (which will later be converted to a span)
                 if (!(child !== undefined && child !== null ? child.props : undefined)) {
                     childIndex++;
                     return child;
@@ -527,13 +533,10 @@
                 else if (!definition.height) {
                     definition.height = 'omit';
                 }
-                definition = Object.assign({}, getChildLayoutFromStyle(component), definition)
+                definition = Object.assign({}, getChildLayoutFromStyle(component), definition);
             }
             else {
                 return getChildLayoutFromStyle(component);
-                if (!definition) {
-                    return;
-                }
             }
         }
 
@@ -672,18 +675,18 @@
     /**
      * Returns truthy object (treat undefined as false)
      */
-    function hasReactLayout (component) {
-        return (
-            (component.props !== undefined && component.props !== null ?
-                component.props.layoutHeight : undefined) ||
-            (component.props !== undefined && component.props !== null ?
-                component.props.layoutWidth : undefined) ||
-            (component.constructor !== undefined && component.constructor !== null ?
-                component.constructor.hasReactLayout : undefined) ||
-            (component.type !== undefined && component.type !== null ?
-                component.type.hasReactLayout : undefined)
-        );
-    }
+    // function hasReactLayout (component) {
+    //     return (
+    //         (component.props !== undefined && component.props !== null ?
+    //             component.props.layoutHeight : undefined) ||
+    //         (component.props !== undefined && component.props !== null ?
+    //             component.props.layoutWidth : undefined) ||
+    //         (component.constructor !== undefined && component.constructor !== null ?
+    //             component.constructor.hasReactLayout : undefined) ||
+    //         (component.type !== undefined && component.type !== null ?
+    //             component.type.hasReactLayout : undefined)
+    //     );
+    // }
 
     /**
      * Returns truthy object (treat undefined as false)
@@ -741,10 +744,6 @@
 
     var unmanaged = function (element) {
         return element.measure === 0;
-    };
-
-    var managed = function (element) {
-        return element.measure !== 0;
     };
 
     var needsWrap = function (wraps) {
@@ -847,6 +846,18 @@
             }
         }
         return fontSizeBase;
+    }
+
+    function getLayoutOptions (component) {
+        var defaults = {
+            allowScrollbar: true,
+            allowFlex: true
+        };
+        if (component.props && component.props.layoutOptions) {
+            Object.assign(defaults, component.props.layoutOptions);
+        }
+
+        return defaults;
     }
 
     function convertToPixels (str, context, dim) {

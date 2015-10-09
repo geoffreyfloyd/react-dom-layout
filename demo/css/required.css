@@ -5,3 +5,11 @@
      -moz-box-sizing: border-box;
           box-sizing: border-box;
 }
+
+/**
+ * Firefox & IE both seem to default to a margin of 0.5em (8px)
+ * while Chrome seems to have no preset margin
+ */
+body {
+  margin: 0;
+}

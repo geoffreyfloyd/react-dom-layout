@@ -59,7 +59,7 @@ npm install --save https://github.com/geoffreyfloyd/react-dom-layout.git#master
 Check out the demo for a self-explanatory example of how to use the components:
 http://geoffreyfloyd.github.io/react-dom-layout/
 
-The following common CSS reset selector is required for layout to work consistently:
+The following common CSS reset selector is required for layout to work consistently across major browsers:
 
     *,
     *:before,
@@ -67,6 +67,10 @@ The following common CSS reset selector is required for layout to work consisten
       -webkit-box-sizing: border-box;
          -moz-box-sizing: border-box;
               box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
     }
 
 ## Recently Added Features
