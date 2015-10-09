@@ -57,6 +57,7 @@
 	         * RENDERING
 	         *************************************************************/
 	        render: function render() {
+	            var breakpoints = [{ trg: 'child', dim: 'width', max: '15rem', ctx: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { trg: 'child', dim: 'width', min: '30rem', ctx: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { trg: 'parent', dim: 'width', ctx: { style: { fontSize: '0.75rem', color: 'orange' } } }];
 	            return React.createElement(
 	                WindowSizeLayout,
 	                null,
@@ -65,32 +66,18 @@
 	                    { key: 'top', layoutHeight: '50%', style: { border: '10px solid black', borderRadius: '10px', margin: '5px', padding: '1em' } },
 	                    React.createElement(
 	                        Layout,
-	                        { key: 'top-left-left', layoutHeight: 'omit', layoutWidth: '50%', style: { border: '1px solid black', margin: '20px', overflowY: 'auto' } },
+	                        { key: 'top-left', layoutHeight: 'omit', layoutWidth: '50%', style: { border: '1px solid black', margin: '20px' } },
 	                        React.createElement(
 	                            Layout,
-	                            { key: 'top-left', layoutFontSize: '2rem', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px', overflowY: 'auto' } },
+	                            { key: 'top-left-inner', layoutFontSize: '2rem', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
 	                            range(1, 15).map(function (content) {
 	                                return React.createElement(
 	                                    'div',
-	                                    { layoutWidth: 'flex:2.5em:5em', layoutBreakpoints: [{ dim: 'width', min: '2.5em', max: '4em', fontSize: '0.25em' }], style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
+	                                    { layoutWidth: 'flex:2.5rem:5rem', layoutBreakpoints: breakpoints, style: { border: '1px solid black', margin: '5px' } },
 	                                    'Content ',
 	                                    String(content)
 	                                );
 	                            })
-	                        ),
-	                        React.createElement(
-	                            Layout,
-	                            { key: 'top-left-right', layoutWidth: 'flex:20rem', style: { border: '1px solid black', margin: '5px' } },
-	                            React.createElement(
-	                                'div',
-	                                { key: 'top-left-c', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
-	                                'Content 1.C'
-	                            ),
-	                            React.createElement(
-	                                'div',
-	                                { key: 'top-left-d', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
-	                                'Content 1.D'
-	                            )
 	                        )
 	                    ),
 	                    React.createElement(
@@ -109,7 +96,7 @@
 	                    range(1, 1000).map(function (content) {
 	                        return React.createElement(
 	                            'div',
-	                            { layoutHeight: '5em', layoutWidth: 'flex:5em:10em', style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
+	                            { layoutHeight: '5em', layoutWidth: 'flex:5em:10em', style: { border: '1px solid black', margin: '5px' } },
 	                            'Content ',
 	                            String(content)
 	                        );
@@ -20551,8 +20538,8 @@
 	})(function (React) {
 	    // many thanks to https://github.com/jsdf/react-layout for base of layout logic
 	    var DIMENSIONS = ['height', 'width'];
-	    var PARENT_CONTEXT = ['border', 'padding'];
-	    var THIS_CONTEXT = ['margin'];
+	    var INNER_MODIFIERS = ['border', 'padding'];
+	    var OUTER_MODIFIERS = ['margin'];
 	    var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
 	    var SCROLLBAR_WIDTH = 22;
 
@@ -20583,29 +20570,6 @@
 	        /*************************************************************
 	         * RENDERING HELPERS
 	         *************************************************************/
-	        getParentContext: function getParentContext(correction) {
-	            var layoutContext = _Object$assign({}, this.getLayoutContext());
-
-	            if (correction) {
-	                DIMENSIONS.forEach(function (dim) {
-	                    if (layoutContext[dim] && correction[dim]) {
-	                        layoutContext[dim] -= correction[dim];
-	                    }
-	                });
-	            }
-
-	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(this.props.style, PARENT_CONTEXT, layoutContext);
-	                DIMENSIONS.forEach(function (dim) {
-	                    if (layoutContext[dim]) {
-	                        layoutContext[dim] -= sizeModifiers[dim];
-	                    }
-	                });
-	            }
-
-	            return layoutContext;
-	        },
-
 	        getLayoutContext: function getLayoutContext() {
 	            var layoutContext = {};
 
@@ -20626,16 +20590,10 @@
 	                        fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : void 0
 	                    };
 	                }
-
-	                // set the font size for ems
-	                if (inherited && this.props && this.props.layoutFontSize || this.props.style && this.props.style.fontSize) {
-
-	                    layoutContext.fontSize = convertToPixels(this.props.style.fontSize || this.props.layoutFontSize, layoutContext);
-	                }
 	            }
 
 	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(this.props.style, THIS_CONTEXT, layoutContext);
+	                var sizeModifiers = getSizeModifiers(reduceStyle(this.props.style), OUTER_MODIFIERS, layoutContext);
 	                DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
 	                        layoutContext[dim] -= sizeModifiers[dim];
@@ -20646,14 +20604,39 @@
 	            return layoutContext;
 	        },
 
-	        getLocalLayout: function getLocalLayout(correction) {
+	        getParentLayout: function getParentLayout(subtract) {
+	            var layoutContext = _Object$assign({}, this.getLayoutContext());
+
+	            if (subtract) {
+	                DIMENSIONS.forEach(function (dim) {
+	                    if (layoutContext[dim] && subtract[dim]) {
+	                        layoutContext[dim] -= subtract[dim];
+	                    }
+	                });
+	            }
+
+	            if (this.props.style) {
+	                var sizeModifiers = getSizeModifiers(reduceStyle(this.props.style), INNER_MODIFIERS, layoutContext);
+	                DIMENSIONS.forEach(function (dim) {
+	                    if (layoutContext[dim]) {
+	                        layoutContext[dim] -= sizeModifiers[dim];
+	                    }
+	                });
+	            }
+
+	            return layoutContext;
+	        },
+
+	        /**
+	         * Return calculated style for component
+	         */
+	        getLocalLayout: function getLocalLayout(subtract) {
 	            var layoutContext, local;
 
 	            local = {};
 	            layoutContext = this.getLayoutContext();
 	            guardLayoutContext(layoutContext);
-	            //TODO: when should we use getLayoutDef over getLayoutContext?
-	            //var def = getLayoutDef(this);
+
 	            if (layoutContext) {
 	                local.fontSize = layoutContext.fontSize;
 	                DIMENSIONS.forEach(function (dim) {
@@ -20663,20 +20646,27 @@
 	                });
 	            }
 
-	            if (correction) {
+	            if (subtract) {
 	                DIMENSIONS.forEach(function (dim) {
-	                    if (correction[dim] && local[dim]) {
-	                        local[dim] -= correction[dim];
+	                    if (subtract[dim] && local[dim]) {
+	                        local[dim] -= subtract[dim];
 	                    }
 	                });
+	            }
+
+	            var breakpoint = {};
+	            applyBreakpoints(this, breakpoint, local, 'parent');
+
+	            if (breakpoint.style) {
+	                _Object$assign(local, breakpoint.style);
 	            }
 
 	            return local;
 	        },
 
-	        measureLayoutForChildren: function measureLayoutForChildren(children, correction) {
+	        measureLayoutForChildren: function measureLayoutForChildren(children, subtract) {
 	            var parentLayout, layout;
-	            parentLayout = this.getParentContext(correction);
+	            parentLayout = this.getParentLayout(subtract);
 	            guardLayoutContext(parentLayout);
 
 	            // wrap
@@ -20694,40 +20684,58 @@
 	                return lay;
 	            }, {});
 
+	            // additional styles from breakpoint
+	            layout.styles = [];
+
 	            // Measure
 	            reactForEach(children, function (child) {
-	                var def;
-	                if (!child) {
-	                    return;
-	                }
+	                var childLayout;
 
-	                def = getLayoutDef(child);
-	                if (!def) {
-	                    return;
+	                if (child) {
+	                    childLayout = getChildLayout(child, parentLayout);
+
+	                    if (childLayout) {
+	                        // add style that may have been applied from breakpoint
+	                        layout.styles.push(childLayout.style || {});
+	                    } else {
+	                        //return;
+	                        layout.styles.push({});
+	                        //debugger;
+	                    }
 	                }
+	                // else {
+	                //     return;
+	                // }
 
 	                DIMENSIONS.forEach(function (dim) {
 	                    // get currect wrap
 	                    var wrap = layout[dim].wraps[layout[dim].wraps.length - 1];
 
+	                    var arg;
 	                    var calculate = true;
+	                    var fontSize = childLayout && childLayout.fontSize ? convertToPixels(childLayout.fontSize, parentLayout, dim) : parentLayout.fontSize;
 	                    var min = 1;
 
-	                    if (layoutIsFixed(def[dim], parentLayout, dim)) {
-	                        // fixed is min
-	                        min = convertToPixels(def[dim], parentLayout, dim);
+	                    if (!child || !childLayout || childLayout[dim] === void 0 || childLayout[dim] === 'omit') {
+	                        arg = childLayout ? childLayout[dim] : void 0;
+	                        min = 0;
 	                        calculate = false;
-	                    } else if (layoutIsFlex(def[dim])) {
+	                    } else if (layoutIsFixed(childLayout[dim], parentLayout, dim)) {
+	                        // fixed is min
+	                        arg = childLayout[dim];
+	                        min = convertToPixels(childLayout[dim], parentLayout, dim);
+	                        calculate = false;
+	                    } else if (layoutIsFlex(childLayout[dim])) {
 	                        // check for flex min
-	                        var flexParams = def[dim].split(':');
+	                        arg = childLayout[dim];
+	                        var flexParams = childLayout[dim].split(':');
 	                        if (flexParams.length > 1 && flexParams[1] !== '') {
 	                            min = convertToPixels(flexParams[1], parentLayout, dim);
 	                        }
-	                    } else if (def[dim] === 'inherit') {
-	                        min = parentLayout[dim];
-	                        calculate = false;
-	                    } else if (def[dim] === void 0 || def[dim] === 'omit') {
-	                        min = 0;
+	                    } else {
+	                        // inherit and all else  if (childLayout[dim] === 'inherit')
+	                        arg = childLayout[dim];
+	                        min = parentLayout[dim] || 0;
 	                        calculate = false;
 	                    }
 
@@ -20742,8 +20750,9 @@
 	                    // add element to the wrap
 	                    wrap.available -= min;
 	                    wrap.elements.push({
-	                        arg: def[dim],
+	                        arg: arg,
 	                        calculate: calculate,
+	                        fontSize: fontSize,
 	                        measure: min
 	                    });
 	                });
@@ -20765,25 +20774,26 @@
 	                            if (flexArgs.length > 2 && flexArgs[2] !== '') {
 	                                var max = convertToPixels(flexArgs[2], parentLayout, dim);
 	                                if (max < evenDistrib + element.measure) {
-	                                    element.measure += max - element.measure;
-	                                    wrap.available -= max - element.measure;
+	                                    var maxAvail = max - element.measure;
+	                                    element.measure += maxAvail;
+	                                    wrap.available -= maxAvail;
+	                                    element.calculate = false;
 	                                } else {
 	                                    element.measure += evenDistrib;
 	                                    wrap.available -= evenDistrib;
-	                                    element.calculate = false;
 	                                }
 	                            } else {
 	                                element.measure += evenDistrib;
 	                                wrap.available -= evenDistrib;
-	                                element.calculate = false;
 	                            }
 	                        });
 
-	                        // second pass, if needed
+	                        // assign the rest of available space to items that can
+	                        // still flex
 	                        uncalculatedElements = wrap.elements.filter(uncalculated).length;
 	                        if (uncalculatedElements > 0 && wrap.available > 0.0) {
 	                            evenDistrib = wrap.available / uncalculatedElements;
-	                            wrap.elements.forEach(function (element) {
+	                            wrap.elements.filter(uncalculated).forEach(function (element) {
 	                                element.measure += evenDistrib;
 	                                wrap.available -= evenDistrib;
 	                                element.calculate = false;
@@ -20792,9 +20802,6 @@
 	                    }
 	                });
 	            });
-
-	            //TODO: detect when the parent container is not large enough for
-	            // its children, and apply appropriate overflow and subtract scroll w/h
 
 	            var containerStyle = {};
 	            if (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps)) {
@@ -20821,59 +20828,78 @@
 	        applyLayoutToChildren: function applyLayoutToChildren(children, measure) {
 	            var childIndex = 0;
 	            var processChild = function processChild(child) {
-	                var def, layout;
+
+	                // TODO: If child has no props then just return the child.. but why?
 	                if (!(child !== void 0 && child !== null ? child.props : void 0)) {
 	                    childIndex++;
 	                    return child;
 	                }
+
+	                // TODO: Figure out what happens when a ref child is cloned
 	                if (child.props.ref !== void 0 && child.props.ref !== null) {
+	                    debugger;
 	                    childIndex++;
 	                    return child;
 	                }
 
+	                var layout;
 	                layout = _Object$assign({}, measure.parentLayout);
-	                def = getLayoutDef(child);
 
-	                // child has no layout props,
-	                // do not modify it
-	                if (!def) {
-	                    //return child;
-	                    childIndex++;
-	                    return React.cloneElement(child, {
-	                        layoutContext: layout
-	                    });
-	                }
-
+	                var hasLayout = false;
 	                DIMENSIONS.forEach(function (dim) {
-	                    if (layoutIsOmitted(def[dim])) {
-	                        delete layout[dim];
-	                    } else {
-	                        var wrap = getWrap(childIndex, measure.layout[dim].wraps);
-	                        layout[dim] = wrap.elements[wrap.currentIndex].measure;
+	                    var wrap = getWrap(childIndex, measure.layout[dim].wraps);
+	                    if (wrap) {
+	                        if (wrap.elements[wrap.currentIndex].arg !== void 0) {
+	                            hasLayout = true;
+	                            // Apply dimension
+	                            if (layoutIsOmitted(wrap.elements[wrap.currentIndex].arg)) {
+	                                delete layout[dim];
+	                            } else {
+	                                layout[dim] = wrap.elements[wrap.currentIndex].measure;
+	                            }
+	                        }
+	                        // Apply fontSizeBase
+	                        if (wrap.elements[wrap.currentIndex].fontSize) {
+	                            layout.fontSize = wrap.elements[wrap.currentIndex].fontSize;
+	                        }
 	                    }
 	                });
-
-	                childIndex++;
 
 	                if (isReactLayout(child)) {
 	                    // if it is a react layout then
 	                    // pass a layout context and
 	                    // allow it to set its own style props
+	                    childIndex++;
 	                    return React.cloneElement(child, {
 	                        layoutContext: layout
 	                    });
 	                } else {
 
-	                    // don't pass fontsize layout context to
-	                    // the style, it's already inherited by the parent
-	                    var styleLayout = _Object$assign({}, layout);
-	                    if (styleLayout.fontSize) {
-	                        delete styleLayout.fontSize;
+	                    // if it didn't have a layout at all
+	                    // then only pass the context so that
+	                    // it can be passed on, however, do
+	                    // not set any styles
+	                    if (!hasLayout) {
+	                        childIndex++;
+
+	                        // strip off unused props
+	                        for (var prop in layout) {
+	                            if (layout.hasOwnProperty(prop) && !layout[prop]) {
+	                                delete layout[prop];
+	                            }
+	                        }
+
+	                        return React.cloneElement(child, {
+	                            layoutContext: layout
+	                        });
 	                    }
+
+	                    var layoutStyle = _Object$assign({}, layout);
+	                    var breakpointStyle = measure.layout.styles[childIndex];
 
 	                    // resolve style
 	                    // we don't want min and max dims in our style
-	                    var style = _Object$assign({}, child.props.style, styleLayout);
+	                    var style = _Object$assign({}, reduceStyle(child.props.style), layoutStyle, breakpointStyle);
 	                    var removeProps = ['minWidth', 'maxWidth', 'minHeight', 'maxHeight'];
 	                    removeProps.forEach(function (prop) {
 	                        if (style[prop]) {
@@ -20884,7 +20910,7 @@
 	                    // non-layout components need to account for margin
 	                    // because it won't get it's own render pass to call
 	                    // getLayoutContext, which accounts for margin
-	                    var sizeModifiers = getSizeModifiers(style, THIS_CONTEXT, measure.parentLayout);
+	                    var sizeModifiers = getSizeModifiers(style, OUTER_MODIFIERS, measure.parentLayout);
 	                    DIMENSIONS.forEach(function (dim) {
 	                        if (style[dim]) {
 	                            style[dim] -= sizeModifiers[dim];
@@ -20894,6 +20920,7 @@
 	                    // if it only has layoutWidth or layoutHeight props
 	                    // but is not a true layout component, then set the
 	                    // style
+	                    childIndex++;
 	                    return React.cloneElement(child, {
 	                        layoutContext: layout,
 	                        style: style
@@ -20924,7 +20951,7 @@
 	                measure = this.measureLayoutForChildren(this.props.children, { width: SCROLLBAR_WIDTH });
 	            }
 
-	            extraProps.style = _Object$assign(style || {}, measure.containerStyle, this.getLocalLayout());
+	            extraProps.style = _Object$assign(reduceStyle(style) || {}, measure.containerStyle, this.getLocalLayout());
 	            extraProps.children = this.applyLayoutToChildren(this.props.children, measure);
 	            //extraProps.children = this.props.children;
 	            return component(_Object$assign(this.props, extraProps));
@@ -20954,56 +20981,114 @@
 	    function reactForEach(children, func) {
 	        if (Array.isArray(children)) {
 	            children.forEach(func);
+	        } else if (React.isValidElement(children)) {
+	            func(children);
+	        } else {
+	            React.Children.forEach(children, func);
 	        }
-	        // else if (children instanceof React.ReactElement) {
-	        //     func(children);
-	        // }
-	        else {
-	                React.Children.forEach(children, func);
-	            }
 	    }
 
 	    function reactMap(children, func) {
 	        if (Array.isArray(children)) {
 	            return children.map(func);
+	        } else if (React.isValidElement(children)) {
+	            return func(children);
+	        } else {
+	            return React.Children.map(children, func);
 	        }
-	        // else if (children instanceof React.ReactElement) {
-	        //     return func(children);
-	        // }
-	        else {
-	                return React.Children.map(children, func);
-	            }
 	    }
 
-	    function getLayoutDef(component) {
+	    function getChildLayout(component, context) {
 	        var defaultSetting, definition;
 
-	        if (!hasReactLayout(component)) {
-	            // hold your horses, we're not giving up on laying out this
-	            // component just yet, let's check the style props
-	            return getLayoutDefFromStyle(component);
-	        }
 	        if (isReactLayout(component)) {
 	            defaultSetting = 'inherit';
+	            definition = {
+	                height: component.props.layoutHeight,
+	                width: component.props.layoutWidth,
+	                fontSize: component.props.layoutFontSize
+	            };
 	        } else {
 	            defaultSetting = 'omit';
+	            definition = {
+	                height: component.props.layoutHeight,
+	                width: component.props.layoutWidth,
+	                fontSize: component.props.layoutFontSize
+	            };
+
+	            // strip off unused props
+	            for (var prop in definition) {
+	                if (definition.hasOwnProperty(prop) && definition[prop] === null) {
+	                    definition[prop] = defaultSetting;
+	                } else if (definition.hasOwnProperty(prop) && definition[prop] === void 0) {
+	                    delete definition[prop];
+	                }
+	            }
+
+	            if (definition.fontSize && definition.fontSize === 'omit') {
+	                definition.fontSize = getFontSizeBase();
+	            }
+
+	            if (definition.width || definition.height) {
+	                if (!definition.width) {
+	                    definition.width = 'omit';
+	                } else if (!definition.height) {
+	                    definition.height = 'omit';
+	                }
+	                definition = _Object$assign({}, getChildLayoutFromStyle(component), definition);
+	            } else {
+	                return getChildLayoutFromStyle(component);
+	                if (!definition) {
+	                    return;
+	                }
+	            }
 	        }
-	        definition = {
-	            height: component.props.layoutHeight,
-	            width: component.props.layoutWidth
-	        };
+
 	        if (definition.height === null) {
 	            definition.height = defaultSetting;
 	        }
 	        if (definition.width === null) {
 	            definition.width = defaultSetting;
 	        }
+
+	        /**
+	         * Apply breakpoint to definition
+	         */
+	        applyBreakpoints(component, definition, context, 'child');
+
 	        return definition;
 	    }
 
-	    function getLayoutDefFromStyle(component) {
+	    function applyBreakpoints(component, definition, context, target) {
+	        // apply breakpoint layout
+	        if (component.props && component.props.layoutBreakpoints && component.props.layoutBreakpoints.length) {
+	            component.props.layoutBreakpoints.filter(function (bp) {
+	                return bp.trg === target;
+	            }).forEach(function (breakpoint) {
+	                var min = convertToPixels(breakpoint.min || '0px', context, breakpoint.dim);
+	                var max = convertToPixels(breakpoint.max || '100%', context, breakpoint.dim);
+
+	                // test range of breakpoint
+	                if (context[breakpoint.dim] >= min && max >= context[breakpoint.dim]) {
+	                    // apply pixel conversions if target is parent
+	                    if (target === 'parent') {
+	                        CONTEXT_PROPS.forEach(function (prop) {
+	                            if (breakpoint.ctx.hasOwnProperty(prop)) {
+	                                breakpoint.ctx[prop] = convertToPixels(breakpoint.ctx[prop], context, breakpoint.dim);
+	                            }
+	                        });
+	                    }
+
+	                    // apply breakpoint to layout context
+	                    _Object$assign(definition, breakpoint.ctx);
+	                }
+	            });
+	        }
+	    }
+
+	    function getChildLayoutFromStyle(component) {
 	        if (component.props && component.props.style) {
-	            var style = component.props.style;
+	            var style = reduceStyle(component.props.style);
 	            var definition = {};
 	            if (style.width) {
 	                definition.width = style.width;
@@ -21014,6 +21099,10 @@
 	                definition.height = style.height;
 	            } else if (style.minHeight || style.maxHeight) {
 	                definition.height = 'flex:' + (style.minHeight || '') + ':' + (style.maxHeight || '');
+	            }
+
+	            if (style.fontSize) {
+	                definition.fontSize = style.fontSize;
 	            }
 
 	            if (definition.height || definition.width) {
@@ -21138,8 +21227,16 @@
 	        return false;
 	    };
 
+	    var unmanaged = function unmanaged(element) {
+	        return element.measure === 0;
+	    };
+
+	    var managed = function managed(element) {
+	        return element.measure !== 0;
+	    };
+
 	    var needsWrap = function needsWrap(wraps) {
-	        if (wraps.length > 1) {
+	        if (wraps.length > 1 || wraps[0].elements.filter(unmanaged).length > 0) {
 	            return true;
 	        }
 	        return false;
@@ -21147,6 +21244,11 @@
 
 	    var needsScrollbar = function needsScrollbar(layout, parentLayout) {
 	        var containedHeight = parentLayout.height;
+
+	        if (!containedHeight) {
+	            return false;
+	        }
+
 	        var overallHeight = 0;
 	        var childIndex = 0;
 
@@ -21260,6 +21362,18 @@
 	            }
 	        } else {
 	            return parseFloat(str);
+	        }
+	    }
+
+	    function reduceStyle(style) {
+	        if (Array.isArray(style)) {
+	            var reduce = {};
+	            style.forEach(function (s) {
+	                _Object$assign(reduce, reduceStyle(s));
+	            });
+	            return reduce;
+	        } else {
+	            return style;
 	        }
 	    }
 
