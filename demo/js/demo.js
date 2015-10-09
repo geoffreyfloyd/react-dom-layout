@@ -21001,6 +21001,11 @@
 	    function getChildLayout(component, context) {
 	        var defaultSetting, definition;
 
+	        // React Element is just a string
+	        if (!component.props) {
+	            return;
+	        }
+
 	        if (isReactLayout(component)) {
 	            defaultSetting = 'inherit';
 	            definition = {
