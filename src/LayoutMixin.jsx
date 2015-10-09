@@ -503,7 +503,7 @@
 
             // strip off unused props
             for (var prop in definition) {
-                if (definition.hasOwnProperty(prop) && (definition[prop] === null || definition[prop] === undefined)) {
+                if (definition.hasOwnProperty(prop) && definition[prop] === null) {
                     definition[prop] = defaultSetting;
                 }
                 else if (definition.hasOwnProperty(prop) && definition[prop] === undefined) {
@@ -515,7 +515,13 @@
                 definition.fontSize = getFontSizeBase();
             }
 
-            if (definition.width && definition.height) {
+            if (definition.width || definition.height) {
+                if (!definition.width) {
+                    definition.width = 'omit';
+                }
+                else if (!definition.height) {
+                    definition.height = 'omit';
+                }
                 definition = Object.assign({}, getChildLayoutFromStyle(component), definition)
             }
             else {

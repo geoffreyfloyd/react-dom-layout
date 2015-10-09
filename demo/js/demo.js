@@ -21018,7 +21018,7 @@
 
 	            // strip off unused props
 	            for (var prop in definition) {
-	                if (definition.hasOwnProperty(prop) && (definition[prop] === null || definition[prop] === void 0)) {
+	                if (definition.hasOwnProperty(prop) && definition[prop] === null) {
 	                    definition[prop] = defaultSetting;
 	                } else if (definition.hasOwnProperty(prop) && definition[prop] === void 0) {
 	                    delete definition[prop];
@@ -21029,7 +21029,12 @@
 	                definition.fontSize = getFontSizeBase();
 	            }
 
-	            if (definition.width && definition.height) {
+	            if (definition.width || definition.height) {
+	                if (!definition.width) {
+	                    definition.width = 'omit';
+	                } else if (!definition.height) {
+	                    definition.height = 'omit';
+	                }
 	                definition = _Object$assign({}, getChildLayoutFromStyle(component), definition);
 	            } else {
 	                return getChildLayoutFromStyle(component);
