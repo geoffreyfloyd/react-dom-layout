@@ -73,7 +73,7 @@
 	                            range(1, 15).map(function (content) {
 	                                return React.createElement(
 	                                    'div',
-	                                    { layoutWidth: 'flex:2.5rem:5rem', layoutBreakpoints: breakpoints, style: { border: '1px solid black', margin: '5px', fontSize: '0.5em' } },
+	                                    { layoutWidth: 'flex:2.5rem:5rem', layoutBreakpoints: breakpoints, style: { border: '1px solid black', margin: '5px' } },
 	                                    'Content ',
 	                                    String(content)
 	                                );
@@ -20698,11 +20698,14 @@
 	                        // add style that may have been applied from breakpoint
 	                        layout.styles.push(childLayout.style || {});
 	                    } else {
-	                        return;
+	                        //return;
+	                        layout.styles.push({});
+	                        //debugger;
 	                    }
-	                } else {
-	                    return;
 	                }
+	                // else {
+	                //     return;
+	                // }
 
 	                DIMENSIONS.forEach(function (dim) {
 	                    // get currect wrap
@@ -20729,9 +20732,10 @@
 	                        if (flexParams.length > 1 && flexParams[1] !== '') {
 	                            min = convertToPixels(flexParams[1], parentLayout, dim);
 	                        }
-	                    } else if (childLayout[dim] === 'inherit') {
+	                    } else {
+	                        // inherit and all else  if (childLayout[dim] === 'inherit')
 	                        arg = childLayout[dim];
-	                        min = parentLayout[dim];
+	                        min = parentLayout[dim] || 0;
 	                        calculate = false;
 	                    }
 
@@ -20827,7 +20831,6 @@
 
 	                // TODO: If child has no props then just return the child.. but why?
 	                if (!(child !== void 0 && child !== null ? child.props : void 0)) {
-	                    debugger;
 	                    childIndex++;
 	                    return child;
 	                }
@@ -20846,16 +20849,18 @@
 	                DIMENSIONS.forEach(function (dim) {
 	                    var wrap = getWrap(childIndex, measure.layout[dim].wraps);
 	                    if (wrap) {
-	                        hasLayout = true;
+	                        if (wrap.elements[wrap.currentIndex].arg !== void 0) {
+	                            hasLayout = true;
+	                            // Apply dimension
+	                            if (layoutIsOmitted(wrap.elements[wrap.currentIndex].arg)) {
+	                                delete layout[dim];
+	                            } else {
+	                                layout[dim] = wrap.elements[wrap.currentIndex].measure;
+	                            }
+	                        }
 	                        // Apply fontSizeBase
 	                        if (wrap.elements[wrap.currentIndex].fontSize) {
 	                            layout.fontSize = wrap.elements[wrap.currentIndex].fontSize;
-	                        }
-	                        // Apply dimension
-	                        if (layoutIsOmitted(wrap.elements[wrap.currentIndex].arg)) {
-	                            delete layout[dim];
-	                        } else {
-	                            layout[dim] = wrap.elements[wrap.currentIndex].measure;
 	                        }
 	                    }
 	                });
@@ -20876,6 +20881,14 @@
 	                    // not set any styles
 	                    if (!hasLayout) {
 	                        childIndex++;
+
+	                        // strip off unused props
+	                        for (var prop in layout) {
+	                            if (layout.hasOwnProperty(prop) && !layout[prop]) {
+	                                delete layout[prop];
+	                            }
+	                        }
+
 	                        return React.cloneElement(child, {
 	                            layoutContext: layout
 	                        });
@@ -20988,21 +21001,44 @@
 	    function getChildLayout(component, context) {
 	        var defaultSetting, definition;
 
-	        if (!hasReactLayout(component)) {
-	            // hold your horses, we're not giving up on laying out this
-	            // component just yet, let's check the style props
-	            return getChildLayoutFromStyle(component);
-	        }
 	        if (isReactLayout(component)) {
 	            defaultSetting = 'inherit';
+	            definition = {
+	                height: component.props.layoutHeight,
+	                width: component.props.layoutWidth,
+	                fontSize: component.props.layoutFontSize
+	            };
 	        } else {
 	            defaultSetting = 'omit';
+	            definition = {
+	                height: component.props.layoutHeight,
+	                width: component.props.layoutWidth,
+	                fontSize: component.props.layoutFontSize
+	            };
+
+	            // strip off unused props
+	            for (var prop in definition) {
+	                if (definition.hasOwnProperty(prop) && (definition[prop] === null || definition[prop] === void 0)) {
+	                    definition[prop] = defaultSetting;
+	                } else if (definition.hasOwnProperty(prop) && definition[prop] === void 0) {
+	                    delete definition[prop];
+	                }
+	            }
+
+	            if (definition.fontSize && definition.fontSize === 'omit') {
+	                definition.fontSize = getFontSizeBase();
+	            }
+
+	            if (definition.width && definition.height) {
+	                definition = _Object$assign({}, getChildLayoutFromStyle(component), definition);
+	            } else {
+	                return getChildLayoutFromStyle(component);
+	                if (!definition) {
+	                    return;
+	                }
+	            }
 	        }
-	        definition = {
-	            height: component.props.layoutHeight,
-	            width: component.props.layoutWidth,
-	            fontSize: component.props.layoutFontSize
-	        };
+
 	        if (definition.height === null) {
 	            definition.height = defaultSetting;
 	        }
@@ -21186,8 +21222,16 @@
 	        return false;
 	    };
 
+	    var unmanaged = function unmanaged(element) {
+	        return element.measure === 0;
+	    };
+
+	    var managed = function managed(element) {
+	        return element.measure !== 0;
+	    };
+
 	    var needsWrap = function needsWrap(wraps) {
-	        if (wraps.length > 1) {
+	        if (wraps.length > 1 || wraps[0].elements.filter(unmanaged).length > 0) {
 	            return true;
 	        }
 	        return false;
@@ -21195,6 +21239,11 @@
 
 	    var needsScrollbar = function needsScrollbar(layout, parentLayout) {
 	        var containedHeight = parentLayout.height;
+
+	        if (!containedHeight) {
+	            return false;
+	        }
+
 	        var overallHeight = 0;
 	        var childIndex = 0;
 

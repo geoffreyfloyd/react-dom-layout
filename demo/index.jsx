@@ -27,7 +27,7 @@
                         <Layout key="top-left" layoutHeight="omit" layoutWidth="50%" style={{ border: '1px solid black', margin: '20px' }}>
                             <Layout key="top-left-inner" layoutFontSize="2rem" layoutWidth="flex:10rem" style={{ border: '1px solid black', margin: '5px' }}>
                                 {range(1,15).map(function (content) {
-                                    return <div layoutWidth="flex:2.5rem:5rem" layoutBreakpoints={breakpoints} style={{border: '1px solid black', margin: '5px', fontSize: '0.5em'}}>Content {String(content)}</div>;
+                                    return <div layoutWidth="flex:2.5rem:5rem" layoutBreakpoints={breakpoints} style={{border: '1px solid black', margin: '5px'}}>Content {String(content)}</div>;
                                 })}
                             </Layout>
                         </Layout>
