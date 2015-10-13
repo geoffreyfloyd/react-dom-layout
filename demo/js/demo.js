@@ -82,7 +82,7 @@
 	                    ),
 	                    React.createElement(
 	                        Layout,
-	                        { key: 'top-right', layoutWidth: '50%', style: { border: '1px solid black' } },
+	                        { key: 'top-right', layoutWidth: '50%', layoutVisible: false, style: { border: '1px solid black' } },
 	                        React.createElement(
 	                            'div',
 	                            null,
@@ -20695,6 +20695,12 @@
 	                    childLayout = getChildLayout(child, parentLayout);
 
 	                    if (childLayout) {
+	                        // Exclude child from layout
+	                        if (childLayout.visible !== void 0 && childLayout.visible === false) {
+	                            layout.styles.push({ visible: false });
+	                            return;
+	                        }
+
 	                        // add style that may have been applied from breakpoint
 	                        layout.styles.push(childLayout.style || {});
 	                    } else {
@@ -20833,6 +20839,10 @@
 	        applyLayoutToChildren: function applyLayoutToChildren(children, measure) {
 	            var childIndex = 0;
 	            var processChild = function processChild(child) {
+
+	                if (measure.layout.styles[childIndex] !== void 0 && measure.layout.styles[childIndex].visible !== void 0 && measure.layout.styles[childIndex].visible === false) {
+	                    return null;
+	                }
 
 	                // child is simply a string (which will later be converted to a span)
 	                if (!(child !== void 0 && child !== null ? child.props : void 0)) {
@@ -21016,14 +21026,16 @@
 	            definition = {
 	                height: component.props.layoutHeight,
 	                width: component.props.layoutWidth,
-	                fontSize: component.props.layoutFontSize
+	                fontSize: component.props.layoutFontSize,
+	                visible: component.props.layoutVisible
 	            };
 	        } else {
 	            defaultSetting = 'omit';
 	            definition = {
 	                height: component.props.layoutHeight,
 	                width: component.props.layoutWidth,
-	                fontSize: component.props.layoutFontSize
+	                fontSize: component.props.layoutFontSize,
+	                visible: component.props.layoutVisible
 	            };
 
 	            // strip off unused props

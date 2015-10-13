@@ -32,7 +32,7 @@
                             </Layout>
                         </Layout>
                         {/* Top Right */}
-                        <Layout key="top-right" layoutWidth="50%" style={{ border: '1px solid black' }}>
+                        <Layout key="top-right" layoutWidth="50%" layoutVisible={false} style={{ border: '1px solid black' }}>
                             <div>Content 2</div>
                         </Layout>
                     </Layout>

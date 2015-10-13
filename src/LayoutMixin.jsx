@@ -164,6 +164,12 @@
                     childLayout = getChildLayout(child, parentLayout);
 
                     if (childLayout) {
+                        // Exclude child from layout
+                        if (childLayout.visible !== undefined && childLayout.visible === false) {
+                            layout.styles.push({ visible: false });
+                            return;
+                        }
+
                         // add style that may have been applied from breakpoint
                         layout.styles.push(childLayout.style || {});
                     }
@@ -309,6 +315,14 @@
         applyLayoutToChildren: function (children, measure) {
             var childIndex = 0;
             var processChild = function (child) {
+
+                // to detect a child should not be laid out, we are currently
+                // setting style.visible: false. Sort of a hacky approach
+                if (measure.layout.styles[childIndex] !== undefined &&
+                    measure.layout.styles[childIndex].visible !== undefined &&
+                    measure.layout.styles[childIndex].visible === false) {
+                    return null;
+                }
 
                 // child is simply a string (which will later be converted to a span)
                 if (!(child !== undefined && child !== null ? child.props : undefined)) {
@@ -501,7 +515,8 @@
             definition = {
                 height: component.props.layoutHeight,
                 width: component.props.layoutWidth,
-                fontSize: component.props.layoutFontSize
+                fontSize: component.props.layoutFontSize,
+                visible: component.props.layoutVisible
             };
         }
         else {
@@ -509,7 +524,8 @@
             definition = {
                 height: component.props.layoutHeight,
                 width: component.props.layoutWidth,
-                fontSize: component.props.layoutFontSize
+                fontSize: component.props.layoutFontSize,
+                visible: component.props.layoutVisible
             };
 
             // strip off unused props
