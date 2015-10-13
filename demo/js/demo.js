@@ -20840,6 +20840,8 @@
 	            var childIndex = 0;
 	            var processChild = function processChild(child) {
 
+	                // to detect a child should not be laid out, we are currently
+	                // setting style.visible: false. Sort of a hacky approach
 	                if (measure.layout.styles[childIndex] !== void 0 && measure.layout.styles[childIndex].visible !== void 0 && measure.layout.styles[childIndex].visible === false) {
 	                    return null;
 	                }
@@ -21658,6 +21660,11 @@
 	         * DEFINITIONS
 	         *************************************************************/
 	        mixins: [LayoutMixin],
+	        statics: {
+	            refreshRoot: function refreshRoot() {
+	                windowSizeStore.refresh();
+	            }
+	        },
 
 	        /**
 	         * Root Window Size Layout disables scroll to handle
@@ -28212,6 +28219,9 @@
 	            width: document.body.clientWidth,
 	            height: document.body.clientHeight
 	        };
+	    };
+	    WindowSizeStore.prototype.refresh = function () {
+	        onWindowResize();
 	    };
 	    return new WindowSizeStore();
 	});

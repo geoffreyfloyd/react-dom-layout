@@ -13,6 +13,11 @@
          * DEFINITIONS
          *************************************************************/
         mixins: [LayoutMixin],
+        statics: {
+            refreshRoot: function () {
+                windowSizeStore.refresh();
+            }
+        },
 
         /**
          * Root Window Size Layout disables scroll to handle

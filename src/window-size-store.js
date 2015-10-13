@@ -38,5 +38,8 @@
             height: document.body.clientHeight
         };
     };
+    WindowSizeStore.prototype.refresh = function () {
+        onWindowResize();
+    };
     return new WindowSizeStore();
 }));
