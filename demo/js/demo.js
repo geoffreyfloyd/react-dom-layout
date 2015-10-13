@@ -28205,6 +28205,10 @@
 	        this.onLastOut = function () {
 	            window.removeEventListener('resize', onWindowResize);
 	        };
+
+	        this.refresh = function () {
+	            onWindowResize();
+	        };
 	    };
 	    WindowSizeStore.prototype = _Object$create(store.Store.prototype);
 	    WindowSizeStore.prototype.constructor = WindowSizeStore;
@@ -28219,9 +28223,6 @@
 	            width: document.body.clientWidth,
 	            height: document.body.clientHeight
 	        };
-	    };
-	    WindowSizeStore.prototype.refresh = function () {
-	        onWindowResize();
 	    };
 	    return new WindowSizeStore();
 	});
