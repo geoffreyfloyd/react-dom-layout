@@ -56,7 +56,7 @@
 
             this.handlers.windowSizeChange
                 .debounce(100)
-                .distinctUntilChanged()
+                //.distinctUntilChanged() // sometimes we want to force a refresh due to scrollbars appearing or disappearing
                 .subscribe(this.handleStoreUpdate);
 
             // Subscribe to stores

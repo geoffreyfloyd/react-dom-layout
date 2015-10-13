@@ -21700,7 +21700,9 @@
 	                windowSizeChange: EventHandler.create()
 	            };
 
-	            this.handlers.windowSizeChange.debounce(100).distinctUntilChanged().subscribe(this.handleStoreUpdate);
+	            this.handlers.windowSizeChange.debounce(100)
+	            //.distinctUntilChanged() // sometimes we want to force a refresh due to scrollbars appearing or disappearing
+	            .subscribe(this.handleStoreUpdate);
 
 	            // Subscribe to stores
 	            windowSizeStore.subscribe(this.handlers.windowSizeChange);
