@@ -42,7 +42,7 @@
 
             if (this.getRootLayoutContext) {
                 layoutContext = this.getRootLayoutContext();
-                layoutContext = Object.assign({fontSize: getFontSizeBase()}, layoutContext);
+                layoutContext = Object.assign({fontSize: getFontSizeBase(), visible: true}, layoutContext);
                 // register root
                 getRootLayoutContext = this.getRootLayoutContext;
             }
@@ -56,7 +56,8 @@
                     layoutContext = {
                         width: isNumber(this.props.layoutWidth) ? this.props.layoutWidth : undefined,
                         height: isNumber(this.props.layoutHeight) ? this.props.layoutHeight : undefined,
-                        fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : undefined
+                        fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : undefined,
+                        visible: this.props.layoutVisible || true
                     };
                 }
             }
@@ -107,6 +108,7 @@
             guardLayoutContext(layoutContext);
 
             if (layoutContext) {
+                local.visible = layoutContext.visible;
                 local.fontSize = layoutContext.fontSize;
                 DIMENSIONS.forEach(function (dim) {
                     if (layoutContext[dim]) {
@@ -124,10 +126,16 @@
             }
 
             var breakpoint = {};
-            applyBreakpoints(this, breakpoint, local, 'parent');
+            applyBreakpoints(this, breakpoint, local, 'self');
 
             if (breakpoint.style) {
                 Object.assign(local, breakpoint.style);
+            }
+
+            if (local.visible === false) {
+                return {
+                    display: 'none'
+                };
             }
 
             return local;
@@ -321,7 +329,21 @@
                 if (measure.layout.styles[childIndex] !== undefined &&
                     measure.layout.styles[childIndex].visible !== undefined &&
                     measure.layout.styles[childIndex].visible === false) {
-                    return null;
+
+                    childIndex++;
+                    if (isReactLayout(child)) {
+                        return React.cloneElement(child, {
+                            layoutContext: Object.assign(child.props.layoutContext || {}, {
+                                visible: false
+                            })
+                        });
+                    }
+                    else {
+                        return React.cloneElement(child, {
+                            style: Object.assign(((child.props ? child.props.style : undefined) || {}), { display: 'none'})
+                        });
+                    }
+
                 }
 
                 // child is simply a string (which will later be converted to a span)
@@ -445,13 +467,21 @@
             var style = ref.style;
             var extraProps = {};
 
-            var measure = this.measureLayoutForChildren(this.props.children);
-            if (measure.needsScrollbar) {
-                measure = this.measureLayoutForChildren(this.props.children, {width: SCROLLBAR_WIDTH});
+            var localStyle = this.getLocalLayout();
+
+            if (localStyle.display === undefined || localStyle.display !== 'none') {
+                var measure = this.measureLayoutForChildren(this.props.children);
+                if (measure.needsScrollbar) {
+                    measure = this.measureLayoutForChildren(this.props.children, {width: SCROLLBAR_WIDTH});
+                }
+
+                extraProps.style = Object.assign(reduceStyle(style) || {}, measure.containerStyle, localStyle);
+                extraProps.children = this.applyLayoutToChildren(this.props.children, measure);
+            }
+            else {
+                extraProps.style = Object.assign({}, (this.props.style || {}), localStyle );
             }
 
-            extraProps.style = Object.assign(reduceStyle(style) || {}, measure.containerStyle, this.getLocalLayout());
-            extraProps.children = this.applyLayoutToChildren(this.props.children, measure);
             //extraProps.children = this.props.children;
             return component(Object.assign(this.props, extraProps));
         },
@@ -566,34 +596,83 @@
         /**
          * Apply breakpoint to definition
          */
-        applyBreakpoints(component, definition, context, 'child');
+        applyBreakpoints(component, definition, context, 'parent');
 
         return definition;
     }
 
-    function applyBreakpoints (component, definition, context, target) {
+    function applyBreakpoints (component, definition, context, contextName) {
         // apply breakpoint layout
         if (component.props && component.props.layoutBreakpoints && component.props.layoutBreakpoints.length) {
-            component.props.layoutBreakpoints.filter(function (bp) { return bp.trg === target; }).forEach(function (breakpoint) {
-                var min = convertToPixels(breakpoint.min || '0px', context, breakpoint.dim);
-                var max = convertToPixels(breakpoint.max || '100%', context, breakpoint.dim);
+            component.props.layoutBreakpoints.map(parseBreakpoint).filter(function (bp) { return bp.ctx === contextName; }).forEach(function (breakpoint) {
+
+                var test = false;
+                switch (breakpoint.eq) {
+                    case '=':
+                    case '==':
+                    case '===':
+                        test = context[breakpoint.prop] === convertToPixels(breakpoint.val, context, breakpoint.prop);
+                        break;
+                    case '<':
+                        test = context[breakpoint.prop] < convertToPixels(breakpoint.val, context, breakpoint.prop);
+                        break;
+                    case '>':
+                        test = context[breakpoint.prop] > convertToPixels(breakpoint.val, context, breakpoint.prop);
+                        break;
+                    case '<=':
+                        test = context[breakpoint.prop] <= convertToPixels(breakpoint.val, context, breakpoint.prop);
+                        break;
+                    case '>=':
+                        test = context[breakpoint.prop] >= convertToPixels(breakpoint.val, context, breakpoint.prop);
+                        break;
+                    case '><':
+                        test = context[breakpoint.prop] > convertToPixels(breakpoint.val.split(':')[0], context, breakpoint.prop) && context[breakpoint.prop] < convertToPixels(breakpoint.val.split(':')[1], context, breakpoint.prop);
+                        break;
+                    case '>=<':
+                    case '>==<':
+                        test = context[breakpoint.prop] >= convertToPixels(breakpoint.val.split(':')[0], context, breakpoint.prop) && context[breakpoint.prop] <= convertToPixels(breakpoint.val.split(':')[1], context, breakpoint.prop);
+                        break;
+                }
 
                 // test range of breakpoint
-                if (context[breakpoint.dim] >= min && max >= context[breakpoint.dim]) {
-                    // apply pixel conversions if target is parent
-                    if (target === 'parent') {
-                        CONTEXT_PROPS.forEach(function (prop) {
-                            if (breakpoint.ctx.hasOwnProperty(prop)) {
-                                breakpoint.ctx[prop] = convertToPixels(breakpoint.ctx[prop], context, breakpoint.dim);
+                if (test) {
+                    // apply pixel conversions if context target is self
+                    if (contextName === 'self') {
+                        DIMENSIONS.forEach(function (prop) {
+                            if (breakpoint.then.hasOwnProperty(prop)) {
+                                breakpoint.then[prop] = convertToPixels(breakpoint.then[prop], context, breakpoint.prop);
                             }
                         });
                     }
 
                     // apply breakpoint to layout context
-                    Object.assign(definition, breakpoint.ctx);
+                    Object.assign(definition, breakpoint.then);
                 }
             });
         }
+    }
+
+    function parseBreakpoint (breakpoint) {
+        return breakpoint.when.split(' ').reduce(function (bp, item, i) {
+            switch (i) {
+                case 0:
+                    var parts = item.split('.');
+                    bp.ctx = parts[0];
+                    bp.prop = parts[1];
+                    break;
+                case 1:
+                    bp.eq = item;
+                case 2:
+                    bp.val = item;
+            }
+            return bp;
+        }, {
+            ctx: 'parent', // client (browser - android, chrome, etc), self]
+            prop: null,
+            eq: '===',
+            val: null,
+            then: breakpoint.then
+        });
     }
 
     function getChildLayoutFromStyle (component) {

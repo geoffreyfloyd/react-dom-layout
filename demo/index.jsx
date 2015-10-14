@@ -13,11 +13,11 @@
          *************************************************************/
         render: function () {
             var breakpoints = [
-                { trg: 'child', dim: 'width', max: '15rem', ctx: {width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red'}}},
-                { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: {width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green'}}},
-                { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: {width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue'}}},
-                { trg: 'child', dim: 'width', min: '30rem', ctx: {width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple'}}},
-                { trg: 'parent', dim: 'width', ctx: {style: { fontSize: '0.75rem', color: 'orange'}}},
+                { when: 'parent.width <= 15rem', then: {width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red'}}},
+                { when: 'parent.width >=< 15rem:20rem', then: {width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green'}}},
+                { when: 'parent.width >=< 25rem:30rem', min: '25rem', max: '30rem', then: {width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue'}}},
+                { when: 'parent.width > 30rem', then: {width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple'}}},
+                { when: 'self.width > 800px', then: {style: { fontSize: '0.75rem', color: 'orange'}}},
             ];
             return (
                 <WindowSizeLayout>
@@ -32,7 +32,7 @@
                             </Layout>
                         </Layout>
                         {/* Top Right */}
-                        <Layout key="top-right" layoutWidth="50%" layoutVisible={false} style={{ border: '1px solid black' }}>
+                        <Layout key="top-right" layoutWidth="50%" layoutVisible={false} layoutBreakpoints={[{when: 'parent.width > 1000px', then: { visible: true }}]} style={{ border: '1px solid black' }}>
                             <div>Content 2</div>
                         </Layout>
                     </Layout>

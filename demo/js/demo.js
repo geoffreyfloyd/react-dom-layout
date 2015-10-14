@@ -57,7 +57,7 @@
 	         * RENDERING
 	         *************************************************************/
 	        render: function render() {
-	            var breakpoints = [{ trg: 'child', dim: 'width', max: '15rem', ctx: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { trg: 'child', dim: 'width', min: '15rem', max: '20rem', ctx: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { trg: 'child', dim: 'width', min: '25rem', max: '30rem', ctx: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { trg: 'child', dim: 'width', min: '30rem', ctx: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { trg: 'parent', dim: 'width', ctx: { style: { fontSize: '0.75rem', color: 'orange' } } }];
+	            var breakpoints = [{ when: 'parent.width <= 15rem', then: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { when: 'parent.width >=< 15rem:20rem', then: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { when: 'parent.width >=< 25rem:30rem', min: '25rem', max: '30rem', then: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { when: 'parent.width > 30rem', then: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { when: 'self.width > 800px', then: { style: { fontSize: '0.75rem', color: 'orange' } } }];
 	            return React.createElement(
 	                WindowSizeLayout,
 	                null,
@@ -82,7 +82,7 @@
 	                    ),
 	                    React.createElement(
 	                        Layout,
-	                        { key: 'top-right', layoutWidth: '50%', layoutVisible: false, style: { border: '1px solid black' } },
+	                        { key: 'top-right', layoutWidth: '50%', layoutVisible: false, layoutBreakpoints: [{ when: 'parent.width > 1000px', then: { visible: true } }], style: { border: '1px solid black' } },
 	                        React.createElement(
 	                            'div',
 	                            null,
@@ -20575,7 +20575,7 @@
 
 	            if (this.getRootLayoutContext) {
 	                layoutContext = this.getRootLayoutContext();
-	                layoutContext = _Object$assign({ fontSize: getFontSizeBase() }, layoutContext);
+	                layoutContext = _Object$assign({ fontSize: getFontSizeBase(), visible: true }, layoutContext);
 	                // register root
 	                getRootLayoutContext = this.getRootLayoutContext;
 	            } else {
@@ -20587,7 +20587,8 @@
 	                    layoutContext = {
 	                        width: isNumber(this.props.layoutWidth) ? this.props.layoutWidth : void 0,
 	                        height: isNumber(this.props.layoutHeight) ? this.props.layoutHeight : void 0,
-	                        fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : void 0
+	                        fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : void 0,
+	                        visible: this.props.layoutVisible || true
 	                    };
 	                }
 	            }
@@ -20638,6 +20639,7 @@
 	            guardLayoutContext(layoutContext);
 
 	            if (layoutContext) {
+	                local.visible = layoutContext.visible;
 	                local.fontSize = layoutContext.fontSize;
 	                DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
@@ -20655,10 +20657,16 @@
 	            }
 
 	            var breakpoint = {};
-	            applyBreakpoints(this, breakpoint, local, 'parent');
+	            applyBreakpoints(this, breakpoint, local, 'self');
 
 	            if (breakpoint.style) {
 	                _Object$assign(local, breakpoint.style);
+	            }
+
+	            if (local.visible === false) {
+	                return {
+	                    display: 'none'
+	                };
 	            }
 
 	            return local;
@@ -20843,7 +20851,19 @@
 	                // to detect a child should not be laid out, we are currently
 	                // setting style.visible: false. Sort of a hacky approach
 	                if (measure.layout.styles[childIndex] !== void 0 && measure.layout.styles[childIndex].visible !== void 0 && measure.layout.styles[childIndex].visible === false) {
-	                    return null;
+
+	                    childIndex++;
+	                    if (isReactLayout(child)) {
+	                        return React.cloneElement(child, {
+	                            layoutContext: _Object$assign(child.props.layoutContext || {}, {
+	                                visible: false
+	                            })
+	                        });
+	                    } else {
+	                        return React.cloneElement(child, {
+	                            style: _Object$assign((child.props ? child.props.style : void 0) || {}, { display: 'none' })
+	                        });
+	                    }
 	                }
 
 	                // child is simply a string (which will later be converted to a span)
@@ -20963,13 +20983,20 @@
 	            var style = ref.style;
 	            var extraProps = {};
 
-	            var measure = this.measureLayoutForChildren(this.props.children);
-	            if (measure.needsScrollbar) {
-	                measure = this.measureLayoutForChildren(this.props.children, { width: SCROLLBAR_WIDTH });
+	            var localStyle = this.getLocalLayout();
+
+	            if (localStyle.display === void 0 || localStyle.display !== 'none') {
+	                var measure = this.measureLayoutForChildren(this.props.children);
+	                if (measure.needsScrollbar) {
+	                    measure = this.measureLayoutForChildren(this.props.children, { width: SCROLLBAR_WIDTH });
+	                }
+
+	                extraProps.style = _Object$assign(reduceStyle(style) || {}, measure.containerStyle, localStyle);
+	                extraProps.children = this.applyLayoutToChildren(this.props.children, measure);
+	            } else {
+	                extraProps.style = _Object$assign({}, this.props.style || {}, localStyle);
 	            }
 
-	            extraProps.style = _Object$assign(reduceStyle(style) || {}, measure.containerStyle, this.getLocalLayout());
-	            extraProps.children = this.applyLayoutToChildren(this.props.children, measure);
 	            //extraProps.children = this.props.children;
 	            return component(_Object$assign(this.props, extraProps));
 	        }
@@ -21075,36 +21102,85 @@
 	        /**
 	         * Apply breakpoint to definition
 	         */
-	        applyBreakpoints(component, definition, context, 'child');
+	        applyBreakpoints(component, definition, context, 'parent');
 
 	        return definition;
 	    }
 
-	    function applyBreakpoints(component, definition, context, target) {
+	    function applyBreakpoints(component, definition, context, contextName) {
 	        // apply breakpoint layout
 	        if (component.props && component.props.layoutBreakpoints && component.props.layoutBreakpoints.length) {
-	            component.props.layoutBreakpoints.filter(function (bp) {
-	                return bp.trg === target;
+	            component.props.layoutBreakpoints.map(parseBreakpoint).filter(function (bp) {
+	                return bp.ctx === contextName;
 	            }).forEach(function (breakpoint) {
-	                var min = convertToPixels(breakpoint.min || '0px', context, breakpoint.dim);
-	                var max = convertToPixels(breakpoint.max || '100%', context, breakpoint.dim);
+
+	                var test = false;
+	                switch (breakpoint.eq) {
+	                    case '=':
+	                    case '==':
+	                    case '===':
+	                        test = context[breakpoint.prop] === convertToPixels(breakpoint.val, context, breakpoint.prop);
+	                        break;
+	                    case '<':
+	                        test = context[breakpoint.prop] < convertToPixels(breakpoint.val, context, breakpoint.prop);
+	                        break;
+	                    case '>':
+	                        test = context[breakpoint.prop] > convertToPixels(breakpoint.val, context, breakpoint.prop);
+	                        break;
+	                    case '<=':
+	                        test = context[breakpoint.prop] <= convertToPixels(breakpoint.val, context, breakpoint.prop);
+	                        break;
+	                    case '>=':
+	                        test = context[breakpoint.prop] >= convertToPixels(breakpoint.val, context, breakpoint.prop);
+	                        break;
+	                    case '><':
+	                        test = context[breakpoint.prop] > convertToPixels(breakpoint.val.split(':')[0], context, breakpoint.prop) && context[breakpoint.prop] < convertToPixels(breakpoint.val.split(':')[1], context, breakpoint.prop);
+	                        break;
+	                    case '>=<':
+	                    case '>==<':
+	                        test = context[breakpoint.prop] >= convertToPixels(breakpoint.val.split(':')[0], context, breakpoint.prop) && context[breakpoint.prop] <= convertToPixels(breakpoint.val.split(':')[1], context, breakpoint.prop);
+	                        break;
+	                }
 
 	                // test range of breakpoint
-	                if (context[breakpoint.dim] >= min && max >= context[breakpoint.dim]) {
-	                    // apply pixel conversions if target is parent
-	                    if (target === 'parent') {
-	                        CONTEXT_PROPS.forEach(function (prop) {
-	                            if (breakpoint.ctx.hasOwnProperty(prop)) {
-	                                breakpoint.ctx[prop] = convertToPixels(breakpoint.ctx[prop], context, breakpoint.dim);
+	                if (test) {
+	                    // apply pixel conversions if context target is self
+	                    if (contextName === 'self') {
+	                        DIMENSIONS.forEach(function (prop) {
+	                            if (breakpoint.then.hasOwnProperty(prop)) {
+	                                breakpoint.then[prop] = convertToPixels(breakpoint.then[prop], context, breakpoint.prop);
 	                            }
 	                        });
 	                    }
 
 	                    // apply breakpoint to layout context
-	                    _Object$assign(definition, breakpoint.ctx);
+	                    _Object$assign(definition, breakpoint.then);
 	                }
 	            });
 	        }
+	    }
+
+	    function parseBreakpoint(breakpoint) {
+	        return breakpoint.when.split(' ').reduce(function (bp, item, i) {
+	            switch (i) {
+	                case 0:
+	                    var parts = item.split('.');
+	                    bp.ctx = parts[0];
+	                    bp.prop = parts[1];
+	                    break;
+	                case 1:
+	                    bp.eq = item;
+	                case 2:
+	                    bp.val = item;
+	            }
+	            return bp;
+	        }, {
+	            ctx: 'parent', // client (browser - android, chrome, etc), self]
+	            prop: null,
+	            eq: '===',
+	            val: null,
+	            then: breakpoint.then
+	        });
 	    }
 
 	    function getChildLayoutFromStyle(component) {
