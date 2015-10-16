@@ -323,6 +323,7 @@
         applyLayoutToChildren: function (children, measure) {
             var childIndex = 0;
             var processChild = function (child) {
+                var layout, prop;
 
                 // to detect a child should not be laid out, we are currently
                 // setting style.visible: false. Sort of a hacky approach
@@ -359,7 +360,6 @@
                     return child;
                 }
 
-                var layout;
                 layout = Object.assign({}, measure.parentLayout);
 
                 var  hasLayout = false;
@@ -404,7 +404,7 @@
                         childIndex++;
 
                         // strip off unused props
-                        for (var prop in layout) {
+                        for (prop in layout) {
                             if (layout.hasOwnProperty(prop) && !layout[prop]) {
                                 delete layout[prop];
                             }
@@ -422,9 +422,9 @@
                     // we don't want min and max dims in our style
                     var style = Object.assign({}, reduceStyle(child.props.style), layoutStyle, breakpointStyle);
                     var removeProps = ['minWidth', 'maxWidth', 'minHeight', 'maxHeight'];
-                    removeProps.forEach(function (prop) {
-                        if (style[prop]) {
-                            delete style[prop];
+                    removeProps.forEach(function (p) {
+                        if (style[p]) {
+                            delete style[p];
                         }
                     });
 
@@ -466,6 +466,7 @@
             var component = ref.component;
             var style = ref.style;
             var extraProps = {};
+            var children;
 
             var localStyle = this.getLocalLayout();
 
@@ -476,14 +477,14 @@
                 }
 
                 extraProps.style = Object.assign(reduceStyle(style) || {}, measure.containerStyle, localStyle);
-                extraProps.children = this.applyLayoutToChildren(this.props.children, measure);
+                children = this.applyLayoutToChildren(this.props.children, measure);
             }
             else {
                 extraProps.style = Object.assign({}, (this.props.style || {}), localStyle );
             }
 
             //extraProps.children = this.props.children;
-            return component(Object.assign(this.props, extraProps));
+            return component(Object.assign(this.props, extraProps), children);
         },
     };
 
@@ -533,7 +534,7 @@
     }
 
     function getChildLayout (component, context) {
-        var defaultSetting, definition;
+        var defaultSetting, definition, prop;
 
         // React Element is just a string
         if (!component.props) {
@@ -559,7 +560,7 @@
             };
 
             // strip off unused props
-            for (var prop in definition) {
+            for (prop in definition) {
                 if (definition.hasOwnProperty(prop) && definition[prop] === null) {
                     definition[prop] = defaultSetting;
                 }
@@ -662,8 +663,10 @@
                     break;
                 case 1:
                     bp.eq = item;
+                    break;
                 case 2:
                     bp.val = item;
+                    break;
             }
             return bp;
         }, {
