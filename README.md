@@ -34,6 +34,26 @@ Additionally, "flex" supports minimum and maximum dimensions, such as:
 - "flex::10em" - no minimum, maximum of 10em.
 - "flex:2em:50%" - minimum of 2em, maximum 50% of the parent layout dimension.
 
+### Conditional Layouts
+
+When the layout depends on conditional factors, such as the size of the parent, then you can utilize a property named 'layoutBreakpoints'. This property expects an array of objects containing two properties:
+
+    ie. { when: 'parent.width >= 800', then: { visible: true }}
+
+Property 'when' is expected to be a string containing a truthy expression that references an object with dot notation. Currently, the only supported context objects are 'parent' and 'self'.
+
+Property 'then' is expected to be an object of properties to be applied if 'when' evaluates to true. Supported properties are:
+
+    - height
+    - width
+    - visible
+    - fontSize
+    - style
+
+Except for style, all the properties affect and follow the same rules as the layout* properties, as opposed to the CSS style properties of the same name.
+
+Note that when the context is 'self', the layout of 'self' has already been determined, so only style can be applied from 'then'.
+
 ### Relational Units and Font Size
 
 Designers tend to rely heavily on 'rem' and 'em' units of measurement. In order to correctly calculate ems in its current scope (assuming font-size has changed from its base size defined in 'html' or 'body'), we can set the font size with a property named 'layoutFontSize'.
