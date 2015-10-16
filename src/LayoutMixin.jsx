@@ -484,7 +484,7 @@
             }
 
             //extraProps.children = this.props.children;
-            return component(Object.assign(this.props, extraProps), children);
+            return component(Object.assign({}, this.props, extraProps), children);
         },
     };
 

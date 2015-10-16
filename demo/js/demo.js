@@ -70,10 +70,10 @@
 	                        React.createElement(
 	                            Layout,
 	                            { key: 'top-left-inner', layoutFontSize: '2rem', layoutWidth: 'flex:10rem', style: { border: '1px solid black', margin: '5px' } },
-	                            range(1, 15).map(function (content) {
+	                            range(1, 15).map(function (content, index) {
 	                                return React.createElement(
 	                                    'div',
-	                                    { layoutWidth: 'flex:2.5rem:5rem', layoutBreakpoints: breakpoints, style: { border: '1px solid black', margin: '5px' } },
+	                                    { key: index, layoutWidth: 'flex:2.5rem:5rem', layoutBreakpoints: breakpoints, style: { border: '1px solid black', margin: '5px' } },
 	                                    'Content ',
 	                                    String(content)
 	                                );
@@ -93,10 +93,10 @@
 	                React.createElement(
 	                    Layout,
 	                    { key: 'bottom', layoutHeight: '50%', style: { border: '1px solid black' } },
-	                    range(1, 1000).map(function (content) {
+	                    range(1, 1000).map(function (content, index) {
 	                        return React.createElement(
 	                            'div',
-	                            { layoutHeight: '5em', layoutWidth: 'flex:5em:10em', style: { border: '1px solid black', margin: '5px' } },
+	                            { key: index, layoutHeight: '5em', layoutWidth: 'flex:5em:10em', style: { border: '1px solid black', margin: '5px' } },
 	                            'Content ',
 	                            String(content)
 	                        );
@@ -20999,7 +20999,7 @@
 	            }
 
 	            //extraProps.children = this.props.children;
-	            return component(_Object$assign(this.props, extraProps), children);
+	            return component(_Object$assign({}, this.props, extraProps), children);
 	        }
 	    };
 
