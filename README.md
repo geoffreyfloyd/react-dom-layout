@@ -16,8 +16,11 @@ Layout components (any react component that has the LayoutMixin applied) are res
 
 - layoutWidth
 - layoutHeight
+- layoutVisible
+- layoutBreakpoints
 
-The value of these properties can be set to "flex", "omit", or a fixed/relative size, such as:
+
+The value of layoutHeight and layoutWidth can be set to "flex", "omit", or a fixed/relative size, such as:
 
 - "20px"
 - "2em" - based on the current font size
@@ -41,6 +44,18 @@ When the layout depends on conditional factors, such as the size of the parent, 
     ie. { when: 'parent.width >= 800', then: { visible: true }}
 
 Property 'when' is expected to be a string containing a truthy expression that references an object with dot notation. Currently, the only supported context objects are 'parent' and 'self'.
+
+The properties that can be referenced are: 'height', 'width', 'fontSize', 'visible'.
+
+The following equation operands are supported:
+
+    - = or == or === : left side of equation equals right side
+    - > : left side of equation is greater than right side
+    - < : left side of equation is less than right side
+    - >= : left side of equation is greater than or equal to right side
+    - <= : left side of equation is less than or equal to right side
+    - >=< or >==< : left side of equation is within inclusive range of two values separated by ':' (ie. parent.width >=< 50:250)
+    - >< : left side of equation is within exclusive range of two values separated by ':' (ie. parent.width >< 50:250)
 
 Property 'then' is expected to be an object of properties to be applied if 'when' evaluates to true. Supported properties are:
 
