@@ -20,7 +20,7 @@ Layout components (any react component that has the LayoutMixin applied) are res
 - layoutBreakpoints
 
 
-The value of layoutHeight and layoutWidth can be set to "flex", "omit", or a fixed/relative size, such as:
+The value of layoutHeight and layoutWidth can be set to `flex`, `omit`, or a fixed/relative size, such as:
 
 - "20px"
 - "2em" - based on the current font size
@@ -39,13 +39,13 @@ Additionally, "flex" supports minimum and maximum dimensions, such as:
 
 ### Conditional Layouts
 
-When the layout depends on conditional factors, such as the size of the parent, then you can utilize a property named 'layoutBreakpoints'. This property expects an array of objects containing two properties:
+When the layout depends on conditional factors, such as the size of the parent, then you can utilize a property named `layoutBreakpoints`. This property expects an array of objects containing two properties:
 
     ie. { when: 'parent.width >= 800', then: { visible: true }}
 
-Property 'when' is expected to be a string containing a truthy expression that references an object with dot notation. Currently, the only supported context objects are 'parent' and 'self'.
+Property when is expected to be a string containing a truthy expression that references an object with dot notation. Currently, the only supported context objects are `parent` and `self`.
 
-The properties that can be referenced are: 'height', 'width', 'fontSize', 'visible'.
+The properties that can be referenced are: `height`, `width`, `fontSize`, and `visible`.
 
 The following equation operands are supported:
 
@@ -57,7 +57,7 @@ The following equation operands are supported:
     - >=< or >==< : left side of equation is within inclusive range of two values separated by ':' (ie. parent.width >=< 50:250)
     - >< : left side of equation is within exclusive range of two values separated by ':' (ie. parent.width >< 50:250)
 
-Property 'then' is expected to be an object of properties to be applied if 'when' evaluates to true. Supported properties are:
+`then` is expected to be an object of properties to be applied if `when` evaluates to true. Supported properties are:
 
     - height
     - width
@@ -67,11 +67,11 @@ Property 'then' is expected to be an object of properties to be applied if 'when
 
 Except for style, all the properties affect and follow the same rules as the layout* properties, as opposed to the CSS style properties of the same name.
 
-Note that when the context is 'self', the layout of 'self' has already been determined, so only style can be applied from 'then'.
+Note that when the context is `self`, the layout of `self` has already been determined, so only style can be applied from `then`.
 
 ### Relational Units and Font Size
 
-Designers tend to rely heavily on 'rem' and 'em' units of measurement. In order to correctly calculate ems in its current scope (assuming font-size has changed from its base size defined in 'html' or 'body'), we can set the font size with a property named 'layoutFontSize'.
+Designers tend to rely heavily on 'rem' and 'em' units of measurement. In order to correctly calculate ems in its current scope (assuming font-size has changed from its base size defined in 'html' or 'body'), we can set the font size with a property named `layoutFontSize`.
 
 ### Relaying the Layout Context
 
