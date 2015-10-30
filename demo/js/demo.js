@@ -47,7 +47,7 @@
 	'use strict';
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(157), __webpack_require__(174));
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(157), __webpack_require__(175));
 	})(function (React, Layout, WindowSizeLayout) {
 	    'use strict';
 	    var Demo = React.createClass({
@@ -20534,14 +20534,15 @@
 	var _Object$assign = __webpack_require__(159)['default'];
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(1));
-	})(function (React) {
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(174));
+	})(function (React, CSS) {
 	    // many thanks to https://github.com/jsdf/react-layout for base of layout logic
 	    var DIMENSIONS = ['height', 'width'];
 	    var INNER_MODIFIERS = ['border', 'padding'];
 	    var OUTER_MODIFIERS = ['margin'];
 	    var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
 	    var SCROLLBAR_WIDTH = 22;
+	    var FLEX = ['flex', '-webkit-flex;', '-ms-flexbox', '-moz-box', '-webkit-box'];
 
 	    var fontSizeBase, getRootLayoutContext;
 
@@ -20819,7 +20820,8 @@
 
 	            var containerStyle = {};
 	            if (getLayoutOptions(this).allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
-	                containerStyle.display = 'flex';
+
+	                containerStyle.display = getFlex();
 	                containerStyle.flexWrap = 'wrap';
 	            }
 
@@ -21491,6 +21493,17 @@
 	        }
 	    }
 
+	    function getFlex() {
+	        var flex;
+	        for (var i = 0; i < FLEX.length; i++) {
+	            if (CSS.supports('display', FLEX[i])) {
+	                flex = FLEX[i];
+	                break;
+	            }
+	        }
+	        return flex;
+	    }
+
 	    return LayoutMixin;
 	});
 
@@ -21720,13 +21733,90 @@
 
 /***/ },
 /* 174 */
+/***/ function(module, exports) {
+
+	/*! CSS.supports() Polyfill
+	* https://gist.github.com/codler/03a0995195aa2859465f
+	* Copyright (c) 2014 Han Lin Yap http://yap.nu; MIT license */
+
+	'use strict';
+
+	if (window) {
+	    if (!('CSS' in window)) {
+	        window.CSS = {};
+	    }
+
+	    if (!('supports' in window.CSS)) {
+	        window.CSS._cacheSupports = {};
+	        window.CSS.supports = function (propertyName, value) {
+	            var key = [propertyName, value].toString();
+	            if (key in window.CSS._cacheSupports) {
+	                return window.CSS._cacheSupports[key];
+	            }
+
+	            function cssSupports(propertyName, value) {
+	                var style = document.createElement('div').style;
+
+	                // 1 argument
+	                if (value === void 0) {
+	                    var mergeOdd = function mergeOdd(propertyName, reg) {
+	                        var arr = propertyName.split(reg);
+
+	                        if (arr.length > 1) {
+	                            return arr.map(function (value, index, arr) {
+	                                return index % 2 == 0 ? value + arr[index + 1] : '';
+	                            }).filter(Boolean);
+	                        }
+	                    }
+
+	                    // The regex will do this '( a:b ) or ( c:d )' => ["( a:b ", ")", "(", " c:d )"]
+	                    ;
+
+	                    var arrOr = mergeOdd(propertyName, /([)])\s*or\s*([(])/gi);
+	                    if (arrOr) {
+	                        return arrOr.some(function (supportsCondition) {
+	                            return window.CSS.supports(supportsCondition);
+	                        });
+	                    }
+	                    var arrAnd = mergeOdd(propertyName, /([)])\s*and\s*([(])/gi);
+	                    if (arrAnd) {
+	                        return arrAnd.every(function (supportsCondition) {
+	                            return window.CSS.supports(supportsCondition);
+	                        });
+	                    }
+
+	                    // Remove the first and last parentheses
+	                    style.cssText = propertyName.replace('(', '').replace(/[)]$/, '');
+	                    // 2 arguments
+	                } else {
+	                        style.cssText = propertyName + ':' + value;
+	                    }
+
+	                return !!style.length;
+	            }
+
+	            return window.CSS._cacheSupports[key] = cssSupports(propertyName, value);
+	        };
+	    }
+
+	    module.exports = exports = window.CSS;
+	} else {
+	    module.exports = exports = {
+	        supports: function supports() {
+	            console.error('Not supported outside of DOM');
+	        }
+	    };
+	}
+
+/***/ },
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	(function (factory) {
 	    'use strict';
-	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(175), __webpack_require__(178), __webpack_require__(158));
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(176), __webpack_require__(179), __webpack_require__(158));
 	})(function (React, EventHandler, windowSizeStore, LayoutMixin) {
 	    'use strict';
 	    var WindowSizeLayout = React.createClass({
@@ -21838,13 +21928,13 @@
 	});
 
 /***/ },
-/* 175 */
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(176));
+	    module.exports = exports = factory(__webpack_require__(177));
 	})(function (Rx) {
 	    return {
 	        create: function create() {
@@ -21864,7 +21954,7 @@
 	});
 
 /***/ },
-/* 176 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global, process) {// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
@@ -28234,10 +28324,10 @@
 
 	}.call(this));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(177)(module), (function() { return this; }()), __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(178)(module), (function() { return this; }()), __webpack_require__(3)))
 
 /***/ },
-/* 177 */
+/* 178 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -28253,15 +28343,15 @@
 
 
 /***/ },
-/* 178 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _Object$create = __webpack_require__(179)['default'];
+	var _Object$create = __webpack_require__(180)['default'];
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(181));
+	    module.exports = exports = factory(__webpack_require__(182));
 	})(function (store) {
 	    var WindowSizeStore = function WindowSizeStore() {
 	        store.Store.call(this);
@@ -28306,13 +28396,13 @@
 	});
 
 /***/ },
-/* 179 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(180), __esModule: true };
+	module.exports = { "default": __webpack_require__(181), __esModule: true };
 
 /***/ },
-/* 180 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(171);
@@ -28321,7 +28411,7 @@
 	};
 
 /***/ },
-/* 181 */
+/* 182 */
 /***/ function(module, exports) {
 
 	'use strict';

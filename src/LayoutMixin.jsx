@@ -1,14 +1,16 @@
 (function (factory) {
     module.exports = exports = factory(
-        require('react')
+        require('react'),
+        require('./css-supports')
     );
-}(function (React) {
+}(function (React, CSS) {
     // many thanks to https://github.com/jsdf/react-layout for base of layout logic
     var DIMENSIONS = ['height', 'width'];
     var INNER_MODIFIERS = ['border', 'padding'];
     var OUTER_MODIFIERS = ['margin'];
     var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
     var SCROLLBAR_WIDTH = 22;
+    var FLEX = ['flex', '-webkit-flex;', '-ms-flexbox', '-moz-box', '-webkit-box'];
 
     var fontSizeBase, getRootLayoutContext;
 
@@ -294,9 +296,12 @@
 
             var containerStyle = {};
             if (getLayoutOptions(this).allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
-                containerStyle.display = 'flex';
+
+                containerStyle.display = getFlex();
                 containerStyle.flexWrap = 'wrap';
             }
+
+            
 
             // if (getLayoutOptions(this).allowFlex && needsWrap(layout.width.wraps)) {
             //
@@ -1010,6 +1015,17 @@
         else {
             return style;
         }
+    }
+
+    function getFlex () {
+        var flex;
+        for (var i = 0; i < FLEX.length; i++) {
+            if (CSS.supports('display', FLEX[i])) {
+                flex = FLEX[i];
+                break;
+            }
+        }
+        return flex;
     }
 
     return LayoutMixin;
