@@ -25,7 +25,7 @@ if (window) {
 
                         if (arr.length > 1) {
                             return arr.map(function (value, index, arr) {
-                                return (index % 2 == 0) ? value + arr[index + 1] : '';
+                                return (index % 2 === 0) ? value + arr[index + 1] : '';
                             }).filter(Boolean);
                         }
                     }
@@ -43,7 +43,8 @@ if (window) {
                     // Remove the first and last parentheses
                     style.cssText = propertyName.replace('(', '').replace(/[)]$/, '');
                     // 2 arguments
-                } else {
+                }
+                else {
                     style.cssText = propertyName + ':' + value;
                 }
 

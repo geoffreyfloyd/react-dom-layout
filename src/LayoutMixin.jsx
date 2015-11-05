@@ -44,7 +44,7 @@
 
             if (this.getRootLayoutContext) {
                 layoutContext = this.getRootLayoutContext();
-                layoutContext = Object.assign({fontSize: getFontSizeBase(), visible: true}, layoutContext);
+                layoutContext = Object.assign({ fontSize: getFontSizeBase(), visible: true }, layoutContext);
                 // register root
                 getRootLayoutContext = this.getRootLayoutContext;
             }
@@ -357,7 +357,7 @@
                     }
                     else {
                         return React.cloneElement(child, {
-                            style: Object.assign(((child.props ? child.props.style : undefined) || {}), { display: 'none'})
+                            style: Object.assign(((child.props ? child.props.style : undefined) || {}), { display: 'none' })
                         });
                     }
 
@@ -378,11 +378,11 @@
 
                 layout = Object.assign({}, measure.parentLayout);
 
-                var  hasLayout = false;
+                var hasLayout = false;
                 DIMENSIONS.forEach(function (dim) {
                     var wrap = getWrap(childIndex, measure.layout[dim].wraps);
                     if (wrap) {
-                        if (wrap.elements[wrap.currentIndex].arg !== undefined ) {
+                        if (wrap.elements[wrap.currentIndex].arg !== undefined) {
                             hasLayout = true;
                             // Apply dimension
                             if (layoutIsOmitted(wrap.elements[wrap.currentIndex].arg)) {
@@ -489,14 +489,14 @@
             if (localStyle.display === undefined || localStyle.display !== 'none') {
                 var measure = this.measureLayoutForChildren(this.props.children);
                 if (measure.needsScrollbar) {
-                    measure = this.measureLayoutForChildren(this.props.children, {width: SCROLLBAR_WIDTH});
+                    measure = this.measureLayoutForChildren(this.props.children, { width: SCROLLBAR_WIDTH });
                 }
 
                 extraProps.style = Object.assign(reduceStyle(style) || {}, measure.containerStyle, localStyle);
                 children = this.applyLayoutToChildren(this.props.children, measure);
             }
             else {
-                extraProps.style = Object.assign({}, (this.props.style || {}), localStyle );
+                extraProps.style = Object.assign({}, (this.props.style || {}), localStyle);
             }
 
             //extraProps.children = this.props.children;
@@ -973,9 +973,9 @@
             Object.assign(defaults, component.props.layoutOptions);
         }
 
-        if (context !== undefined) {
+        if (context !== undefined && component.props && component.props.layoutBreakpoints) {
             var breakpoint = {};
-            applyBreakpoints(this, breakpoint, context, 'self');
+            applyBreakpoints(component, breakpoint, context, 'self');
 
             if (breakpoint.options) {
                 Object.assign(defaults, breakpoint.options);

@@ -21458,9 +21458,9 @@
 	            _Object$assign(defaults, component.props.layoutOptions);
 	        }
 
-	        if (context !== void 0) {
+	        if (context !== void 0 && component.props && component.props.layoutBreakpoints) {
 	            var breakpoint = {};
-	            applyBreakpoints(this, breakpoint, context, 'self');
+	            applyBreakpoints(component, breakpoint, context, 'self');
 
 	            if (breakpoint.options) {
 	                _Object$assign(defaults, breakpoint.options);
@@ -21790,7 +21790,7 @@
 
 	                        if (arr.length > 1) {
 	                            return arr.map(function (value, index, arr) {
-	                                return index % 2 == 0 ? value + arr[index + 1] : '';
+	                                return index % 2 === 0 ? value + arr[index + 1] : '';
 	                            }).filter(Boolean);
 	                        }
 	                    }
