@@ -298,7 +298,12 @@
             if (getLayoutOptions(this).allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
 
                 containerStyle.display = getFlex();
-                containerStyle.flexWrap = 'wrap';
+                if (getLayoutOptions(this).allowFlexWrap) {
+                    containerStyle.flexWrap = 'wrap';
+                }
+                else {
+                    containerStyle.flexWrap = 'nowrap';
+                }
             }
 
             
@@ -954,7 +959,8 @@
     function getLayoutOptions (component) {
         var defaults = {
             allowScrollbar: true,
-            allowFlex: true
+            allowFlex: true,
+            allowFlexWrap: true
         };
         if (component.props && component.props.layoutOptions) {
             Object.assign(defaults, component.props.layoutOptions);
