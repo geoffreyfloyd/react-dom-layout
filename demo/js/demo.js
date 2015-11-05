@@ -20626,12 +20626,12 @@
 	                });
 	            }
 
-	            var breakpoint = {};
-	            applyBreakpoints(this, breakpoint, layoutContext, 'self');
+	            //var breakpoint = {};
+	            //applyBreakpoints(this, breakpoint, layoutContext, 'self');
 
-	            if (breakpoint.options) {
-	                _Object$assign(layoutContext, breakpoint.options);
-	            }
+	            //if (breakpoint.options) {
+	            //    Object.assign(layoutContext, breakpoint.options);
+	            //}
 
 	            return layoutContext;
 	        },
@@ -20826,23 +20826,24 @@
 	            });
 
 	            var containerStyle = {};
-	            if (getLayoutOptions(this).allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
+	            var options = getLayoutOptions(this, parentLayout);
+	            if (options.allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
 
 	                containerStyle.display = getFlex();
-	                if (getLayoutOptions(this).allowFlexWrap) {
+	                if (options.allowFlexWrap) {
 	                    containerStyle.flexWrap = 'wrap';
 	                } else {
 	                    containerStyle.flexWrap = 'nowrap';
 	                }
 	            }
 
-	            // if (getLayoutOptions(this).allowFlex && needsWrap(layout.width.wraps)) {
+	            // if (options.allowFlex && needsWrap(layout.width.wraps)) {
 	            //
 	            // }
 
 	            var scrollbar = needsScrollbar(layout, parentLayout);
 	            if (scrollbar) {
-	                if (getLayoutOptions(this).allowScrollbar) {
+	                if (options.allowScrollbar) {
 	                    containerStyle.overflowY = 'scroll';
 	                } else {
 	                    containerStyle.overflowY = 'hidden';
@@ -21446,14 +21447,24 @@
 	        return fontSizeBase;
 	    }
 
-	    function getLayoutOptions(component) {
+	    function getLayoutOptions(component, context) {
 	        var defaults = {
 	            allowScrollbar: true,
 	            allowFlex: true,
 	            allowFlexWrap: true
 	        };
+
 	        if (component.props && component.props.layoutOptions) {
 	            _Object$assign(defaults, component.props.layoutOptions);
+	        }
+
+	        if (context !== void 0) {
+	            var breakpoint = {};
+	            applyBreakpoints(this, breakpoint, context, 'self');
+
+	            if (breakpoint.options) {
+	                _Object$assign(defaults, breakpoint.options);
+	            }
 	        }
 
 	        return defaults;

@@ -96,12 +96,12 @@
                 });
             }
 
-            var breakpoint = {};
-            applyBreakpoints(this, breakpoint, layoutContext, 'self');
+            //var breakpoint = {};
+            //applyBreakpoints(this, breakpoint, layoutContext, 'self');
 
-            if (breakpoint.options) {
-                Object.assign(layoutContext, breakpoint.options);
-            }
+            //if (breakpoint.options) {
+            //    Object.assign(layoutContext, breakpoint.options);
+            //}
 
             return layoutContext;
         },
@@ -302,10 +302,11 @@
             });
 
             var containerStyle = {};
-            if (getLayoutOptions(this).allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
+            var options = getLayoutOptions(this, parentLayout);
+            if (options.allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
 
                 containerStyle.display = getFlex();
-                if (getLayoutOptions(this).allowFlexWrap) {
+                if (options.allowFlexWrap) {
                     containerStyle.flexWrap = 'wrap';
                 }
                 else {
@@ -313,15 +314,13 @@
                 }
             }
 
-            
-
-            // if (getLayoutOptions(this).allowFlex && needsWrap(layout.width.wraps)) {
+            // if (options.allowFlex && needsWrap(layout.width.wraps)) {
             //
             // }
 
             var scrollbar = needsScrollbar(layout, parentLayout);
             if (scrollbar) {
-                if (getLayoutOptions(this).allowScrollbar) {
+                if (options.allowScrollbar) {
                     containerStyle.overflowY = 'scroll';
                 }
                 else {
@@ -963,14 +962,24 @@
         return fontSizeBase;
     }
 
-    function getLayoutOptions (component) {
+    function getLayoutOptions (component, context) {
         var defaults = {
             allowScrollbar: true,
             allowFlex: true,
             allowFlexWrap: true
         };
+
         if (component.props && component.props.layoutOptions) {
             Object.assign(defaults, component.props.layoutOptions);
+        }
+
+        if (context !== undefined) {
+            var breakpoint = {};
+            applyBreakpoints(this, breakpoint, context, 'self');
+
+            if (breakpoint.options) {
+                Object.assign(defaults, breakpoint.options);
+            }
         }
 
         return defaults;
