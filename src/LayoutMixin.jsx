@@ -96,6 +96,13 @@
                 });
             }
 
+            var breakpoint = {};
+            applyBreakpoints(this, breakpoint, layoutContext, 'self');
+
+            if (breakpoint.options) {
+                Object.assign(layoutContext, breakpoint.options);
+            }
+
             return layoutContext;
         },
 

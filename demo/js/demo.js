@@ -20626,6 +20626,13 @@
 	                });
 	            }
 
+	            var breakpoint = {};
+	            applyBreakpoints(this, breakpoint, layoutContext, 'self');
+
+	            if (breakpoint.options) {
+	                _Object$assign(layoutContext, breakpoint.options);
+	            }
+
 	            return layoutContext;
 	        },
 
@@ -20822,7 +20829,11 @@
 	            if (getLayoutOptions(this).allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
 
 	                containerStyle.display = getFlex();
-	                containerStyle.flexWrap = 'wrap';
+	                if (getLayoutOptions(this).allowFlexWrap) {
+	                    containerStyle.flexWrap = 'wrap';
+	                } else {
+	                    containerStyle.flexWrap = 'nowrap';
+	                }
 	            }
 
 	            // if (getLayoutOptions(this).allowFlex && needsWrap(layout.width.wraps)) {
@@ -21438,7 +21449,8 @@
 	    function getLayoutOptions(component) {
 	        var defaults = {
 	            allowScrollbar: true,
-	            allowFlex: true
+	            allowFlex: true,
+	            allowFlexWrap: true
 	        };
 	        if (component.props && component.props.layoutOptions) {
 	            _Object$assign(defaults, component.props.layoutOptions);
