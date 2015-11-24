@@ -64,7 +64,7 @@ module.exports = function (config) {
             noInfo: true
         },
 
-        singleRun: false,
+        singleRun: true,
 
         /**
          * Array of plugins used
