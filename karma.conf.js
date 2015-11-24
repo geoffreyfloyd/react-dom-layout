@@ -18,7 +18,9 @@ module.exports = function (config) {
          * because it uses an older version of JavaScript.
          */
         files: [
-            'test/Layout-test.jsx'
+            'tests.webpack.js',
+            'test/Layout-test.jsx',
+            'test/SplitLayout-test.jsx'
         ],
 
         /**
@@ -26,7 +28,9 @@ module.exports = function (config) {
          * their source can be properly transpiled.
          */
         preprocessors: {
-            'test/Layout-test.jsx': ['webpack']
+            'tests.webpack.js': ['webpack'],
+            'test/Layout-test.jsx': ['webpack'],
+            'test/SplitLayout-test.jsx': ['webpack']
         },
 
         /**
