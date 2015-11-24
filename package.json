@@ -40,8 +40,10 @@
     "karma-ie-launcher": "^0.2.0",
     "karma-mocha": "^0.1.10",
     "karma-mocha-reporter": "^1.1.2",
+    "karma-phantomjs-launcher": "^0.2.1",
     "karma-webpack": "1.6.0",
     "mocha": "^2.2.5",
+    "phantomjs": "^1.9.19",
     "webpack": "^1.7.3"
   }
 }
