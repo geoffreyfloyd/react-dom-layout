@@ -5,9 +5,9 @@ module.exports = function (config) {
         /**
          * Start these browsers for testing. PhantomJS is a headless browser.
          * Available browsers: https://npmjs.org/browse/keyword/karma-launcher
-         * , 'Firefox', 'IE', 'PhantomJS'
+         * , 'Chrome', 'Firefox', 'IE', 'PhantomJS'
          */
-        browsers: ['Chrome'],
+        browsers: ['PhantomJS'],
 
         reporters: ['mocha'],
 
@@ -70,9 +70,9 @@ module.exports = function (config) {
          * Array of plugins used
          */
         plugins: [
-          require('karma-chrome-launcher'),
-          require('karma-firefox-launcher'),
-          require('karma-ie-launcher'),
+          //require('karma-chrome-launcher'),
+          //require('karma-firefox-launcher'),
+          //require('karma-ie-launcher'),
           require('karma-phantomjs-launcher'),
           require('karma-mocha'),
           require('karma-mocha-reporter'),
