@@ -1,14 +1,15 @@
 ﻿(function (factory) {
     var React = require('react/addons'),
         TestUtils = React.addons.TestUtils,
+        core = require('../src/core'),
         WindowSizeLayout = require('../src/WindowSizeLayout'),
         Layout = require('../src/Layout'),
         SplitLayout = require('../src/SplitLayout');
 
     module.exports = exports = factory(
-        React, TestUtils, WindowSizeLayout, Layout, SplitLayout
+        React, TestUtils, core, WindowSizeLayout, Layout, SplitLayout
     );
-}(function (React, TestUtils, WindowSizeLayout, Layout, SplitLayout) {
+}(function (React, TestUtils, core, WindowSizeLayout, Layout, SplitLayout) {
 
     // Create a Layout component
     var layoutBorders = TestUtils.renderIntoDocument(

@@ -20590,7 +20590,7 @@
 	            layoutContext: React.PropTypes.object
 	        },
 	        statics: {
-	            hasReactLayout: true
+	            isReactDomLayout: true
 	        },
 
 	        getDefaultProps: function getDefaultProps() {
@@ -21324,16 +21324,16 @@
 	    /**
 	     * Returns truthy object (treat undefined as false)
 	     */
-	    // function hasReactLayout (component) {
+	    // function hasLayout (component) {
 	    //     return (
 	    //         (component.props !== undefined && component.props !== null ?
 	    //             component.props.layoutHeight : undefined) ||
 	    //         (component.props !== undefined && component.props !== null ?
 	    //             component.props.layoutWidth : undefined) ||
 	    //         (component.constructor !== undefined && component.constructor !== null ?
-	    //             component.constructor.hasReactLayout : undefined) ||
+	    //             component.constructor.isReactDomLayout : undefined) ||
 	    //         (component.type !== undefined && component.type !== null ?
-	    //             component.type.hasReactLayout : undefined)
+	    //             component.type.isReactDomLayout : undefined)
 	    //     );
 	    // }
 
@@ -21341,7 +21341,7 @@
 	     * Returns truthy object (treat undefined as false)
 	     */
 	    function isReactLayout(component) {
-	        return (component.constructor !== void 0 && component.constructor !== null ? component.constructor.hasReactLayout : void 0) || (component.type !== void 0 && component.type !== null ? component.type.hasReactLayout : void 0);
+	        return (component.constructor !== void 0 && component.constructor !== null ? component.constructor.isReactDomLayout : void 0) || (component.type !== void 0 && component.type !== null ? component.type.isReactDomLayout : void 0);
 	    }
 
 	    /**
