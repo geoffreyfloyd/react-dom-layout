@@ -39,17 +39,25 @@
                 widths[1] = props.flex;
             }
 
-            return (
-                <Layout layoutContext={props.layoutContext}>
-                    {React.Children.map(children, function (child, index) {
-                        return (
-                            <Layout layoutWidth={widths[index]} layoutHeight="omit" style={props.containerStyle}>
-                                {child}
-                            </Layout>
-                        );
-                    })}
-                </Layout>
-            );
+            return Layout(props, React.Children.map(children, function (child, index) {
+                return Layout({
+                    layoutWidth: widths[index],
+                    layoutHeight: "omit",
+                    style: props.containerStyle
+                }, child);
+            }));
+
+            //return (
+            //    <Layout layoutContext={props.layoutContext}>
+            //        {React.Children.map(children, function (child, index) {
+            //            return (
+            //                <Layout layoutWidth={widths[index]} layoutHeight="omit" style={props.containerStyle}>
+            //                    {child}
+            //                </Layout>
+            //            );
+            //        })}
+            //    </Layout>
+            //);
         },
 
         render: function () {
