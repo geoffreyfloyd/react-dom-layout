@@ -1,4 +1,4 @@
-# React DOM Layout
+# React DOM Layout [![Build Status](https://travis-ci.org/hoomanlogic/babble.svg)](https://travis-ci.org/geoffreyfloyd/react-dom-layout)
 
 Sensible React-DOM Layout. Done Better.
 
