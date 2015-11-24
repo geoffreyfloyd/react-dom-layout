@@ -21,10 +21,10 @@
                 { when: 'self.width > 800px', then: {style: { fontSize: '0.75rem', color: 'orange'}}},
             ];
             return (
-                <WindowSizeLayout>
-                    <SplitLayout flex="flex:400px" containerStyle={{border:'1px solid black'}}>
-                        <div>one</div>
-                        <div>two</div>
+                <WindowSizeLayout style={styles.border}>
+                    <SplitLayout flex="flex:400px" containerStyle={styles.border}>
+                        <div style={styles.border}>one</div>
+                        <div style={styles.border}>two</div>
                     </SplitLayout>
                 </WindowSizeLayout>
             );
@@ -57,6 +57,12 @@
             );
         }
     });
+
+    var styles = {
+        border: {
+            border: '1px solid black'
+        }
+    };
 
     var range = function (start, end) {
         if (end === undefined) {

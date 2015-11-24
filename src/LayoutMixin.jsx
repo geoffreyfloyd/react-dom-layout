@@ -483,7 +483,7 @@
             if (component === undefined || component === null) {
                 component = ref.component;
             }
-            var style = ref.style;
+            var style = Object.assign({}, ref.style);
             var extraProps = {};
             var children;
 
