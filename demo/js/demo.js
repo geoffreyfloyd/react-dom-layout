@@ -47,8 +47,8 @@
 	'use strict';
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(157), __webpack_require__(175));
-	})(function (React, Layout, WindowSizeLayout) {
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(157), __webpack_require__(175), __webpack_require__(176));
+	})(function (React, Layout, SplitLayout, WindowSizeLayout) {
 	    'use strict';
 	    var Demo = React.createClass({
 	        displayName: 'Demo',
@@ -58,6 +58,26 @@
 	         *************************************************************/
 	        render: function render() {
 	            var breakpoints = [{ when: 'parent.width <= 15rem', then: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { when: 'parent.width >=< 15rem:20rem', then: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { when: 'parent.width >=< 25rem:30rem', min: '25rem', max: '30rem', then: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { when: 'parent.width > 30rem', then: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { when: 'self.width > 800px', then: { style: { fontSize: '0.75rem', color: 'orange' } } }];
+	            return React.createElement(
+	                WindowSizeLayout,
+	                null,
+	                React.createElement(
+	                    SplitLayout,
+	                    { flex: 'flex:400px', containerStyle: { border: '1px solid black' } },
+	                    React.createElement(
+	                        'div',
+	                        null,
+	                        'one'
+	                    ),
+	                    React.createElement(
+	                        'div',
+	                        null,
+	                        'two'
+	                    )
+	                )
+	            );
+	        },
+	        renderOld: function renderOld() {
 	            return React.createElement(
 	                WindowSizeLayout,
 	                null,
@@ -20519,7 +20539,14 @@
 	        /*************************************************************
 	         * DEFINITIONS
 	         *************************************************************/
-	        mixins: [LayoutMixin]
+	        mixins: [LayoutMixin],
+
+	        /*************************************************************
+	         * RENDER
+	         *************************************************************/
+	        render: function render() {
+	            return this.renderLayout();
+	        }
 	    });
 
 	    return Layout;
@@ -20909,6 +20936,7 @@
 	                                layout[dim] = wrap.elements[wrap.currentIndex].measure;
 	                            }
 	                        }
+
 	                        // Apply fontSizeBase
 	                        if (wrap.elements[wrap.currentIndex].fontSize) {
 	                            layout.fontSize = wrap.elements[wrap.currentIndex].fontSize;
@@ -20991,9 +21019,11 @@
 	        /*************************************************************
 	         * RENDERING
 	         *************************************************************/
-	        render: function render() {
+	        renderLayout: function renderLayout(component) {
 	            var ref = this.props;
-	            var component = ref.component;
+	            if (component === void 0 || component === null) {
+	                component = ref.component;
+	            }
 	            var style = ref.style;
 	            var extraProps = {};
 	            var children;
@@ -21841,8 +21871,74 @@
 	'use strict';
 
 	(function (factory) {
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(157), __webpack_require__(158));
+	})(function (React, Layout, LayoutMixin) {
+	    var SplitLayout = React.createClass({
+	        displayName: 'SplitLayout',
+
+	        /*************************************************************
+	         * DEFINITIONS
+	         *************************************************************/
+	        mixins: [LayoutMixin],
+	        statics: {
+	            orientation: {
+	                horizontal: 0,
+	                vertical: 1
+	            }
+	        },
+
+	        getDefaultProps: function getDefaultProps() {
+	            return {
+	                orientation: 0
+	            };
+	        },
+
+	        /*************************************************************
+	         * RENDER
+	         *************************************************************/
+	        renderHorizontalSplit: function renderHorizontalSplit(props, children) {
+	            var widths = ['50%', '50%'];
+	            if (props.flex !== void 0) {
+	                widths[0] = props.flex;
+	                widths[1] = props.flex;
+	            }
+	            if (props.viewOne !== void 0) {
+	                widths[0] = props.flex;
+	            }
+	            if (props.viewTwo !== void 0) {
+	                widths[1] = props.flex;
+	            }
+
+	            return React.createElement(
+	                Layout,
+	                { layoutContext: props.layoutContext },
+	                React.Children.map(children, function (child, index) {
+	                    return React.createElement(
+	                        Layout,
+	                        { layoutWidth: widths[index], layoutHeight: 'omit', style: props.containerStyle },
+	                        child
+	                    );
+	                })
+	            );
+	        },
+
+	        render: function render() {
+	            return this.renderLayout(this.renderHorizontalSplit);
+	        }
+	    });
+
+	    return SplitLayout;
+	});
+
+/***/ },
+/* 176 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	(function (factory) {
 	    'use strict';
-	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(176), __webpack_require__(179), __webpack_require__(158));
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(177), __webpack_require__(180), __webpack_require__(158));
 	})(function (React, EventHandler, windowSizeStore, LayoutMixin) {
 	    'use strict';
 	    var WindowSizeLayout = React.createClass({
@@ -21946,21 +22042,27 @@
 	            //     width: windowSizeStore.getClientSize().width < windowSizeStore.getWindowSize().width && Math.abs(windowSizeStore.getClientSize().width - windowSizeStore.getWindowSize().width) < 100 ?
 	            //         windowSizeStore.getClientSize().width : windowSizeStore.getWindowSize().width
 	            // };
-	        }
+	        },
 
+	        /*************************************************************
+	         * RENDERING
+	         *************************************************************/
+	        render: function render() {
+	            return this.renderLayout();
+	        }
 	    });
 
 	    return WindowSizeLayout;
 	});
 
 /***/ },
-/* 176 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(177));
+	    module.exports = exports = factory(__webpack_require__(178));
 	})(function (Rx) {
 	    return {
 	        create: function create() {
@@ -21980,7 +22082,7 @@
 	});
 
 /***/ },
-/* 177 */
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global, process) {// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
@@ -28350,10 +28452,10 @@
 
 	}.call(this));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(178)(module), (function() { return this; }()), __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(179)(module), (function() { return this; }()), __webpack_require__(3)))
 
 /***/ },
-/* 178 */
+/* 179 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -28369,15 +28471,15 @@
 
 
 /***/ },
-/* 179 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _Object$create = __webpack_require__(180)['default'];
+	var _Object$create = __webpack_require__(181)['default'];
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(182));
+	    module.exports = exports = factory(__webpack_require__(183));
 	})(function (store) {
 	    var WindowSizeStore = function WindowSizeStore() {
 	        store.Store.call(this);
@@ -28422,13 +28524,13 @@
 	});
 
 /***/ },
-/* 180 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(181), __esModule: true };
+	module.exports = { "default": __webpack_require__(182), __esModule: true };
 
 /***/ },
-/* 181 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(171);
@@ -28437,7 +28539,7 @@
 	};
 
 /***/ },
-/* 182 */
+/* 183 */
 /***/ function(module, exports) {
 
 	'use strict';

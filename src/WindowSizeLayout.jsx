@@ -110,8 +110,14 @@
             //     width: windowSizeStore.getClientSize().width < windowSizeStore.getWindowSize().width && Math.abs(windowSizeStore.getClientSize().width - windowSizeStore.getWindowSize().width) < 100 ?
             //         windowSizeStore.getClientSize().width : windowSizeStore.getWindowSize().width
             // };
-        }
+        },
 
+        /*************************************************************
+         * RENDERING
+         *************************************************************/
+        render: function () {
+            return this.renderLayout();
+        }
     });
 
     return WindowSizeLayout;

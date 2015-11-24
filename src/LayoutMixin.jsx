@@ -478,9 +478,11 @@
         /*************************************************************
          * RENDERING
          *************************************************************/
-        render: function () {
+        renderLayout: function (component) {
             var ref = this.props;
-            var component = ref.component;
+            if (component === undefined || component === null) {
+                component = ref.component;
+            }
             var style = ref.style;
             var extraProps = {};
             var children;

@@ -2,9 +2,10 @@
     module.exports = exports = factory(
         require('react'),
         require('../src/Layout'),
+        require('../src/SplitLayout'),
         require('../src/WindowSizeLayout')
     );
-}(function (React, Layout, WindowSizeLayout) {
+}(function (React, Layout, SplitLayout, WindowSizeLayout) {
     'use strict';
     var Demo = React.createClass({
 
@@ -19,6 +20,16 @@
                 { when: 'parent.width > 30rem', then: {width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple'}}},
                 { when: 'self.width > 800px', then: {style: { fontSize: '0.75rem', color: 'orange'}}},
             ];
+            return (
+                <WindowSizeLayout>
+                    <SplitLayout flex="flex:400px" containerStyle={{border:'1px solid black'}}>
+                        <div>one</div>
+                        <div>two</div>
+                    </SplitLayout>
+                </WindowSizeLayout>
+            );
+        },
+        renderOld: function () {
             return (
                 <WindowSizeLayout>
                     {/* Top Half */}
@@ -38,9 +49,9 @@
                     </Layout>
                     {/* Bottom Half */}
                     <Layout key="bottom" layoutHeight="50%" style={{ border: '1px solid black' }}>
-                        {range(1,1000).map(function (content, index) {
-                            return <div key={index} layoutHeight="5em" layoutWidth="flex:5em:10em" style={{border: '1px solid black', margin: '5px'}}>Content {String(content)}</div>;
-                        })}
+                    {range(1,1000).map(function (content, index) {
+                        return <div key={index} layoutHeight="5em" layoutWidth="flex:5em:10em" style={{border: '1px solid black', margin: '5px'}}>Content {String(content)}</div>;
+                    })}
                     </Layout>
                 </WindowSizeLayout>
             );
