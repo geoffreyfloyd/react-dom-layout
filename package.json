@@ -4,7 +4,8 @@
   "description": "dom layout did better",
   "main": "index.js",
   "scripts": {
-    "test": "karma start"
+    "test": "karma start ./karma.travis.conf.js",
+    "testall": "karma start"
   },
   "keywords": [
     "react",
