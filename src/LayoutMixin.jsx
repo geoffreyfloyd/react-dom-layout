@@ -392,6 +392,10 @@
                                 layout[dim] = wrap.elements[wrap.currentIndex].measure;
                             }
                         }
+                        else {
+                            delete layout[dim];
+                        }
+
                         // Apply fontSizeBase
                         if (wrap.elements[wrap.currentIndex].fontSize) {
                             layout.fontSize = wrap.elements[wrap.currentIndex].fontSize;
