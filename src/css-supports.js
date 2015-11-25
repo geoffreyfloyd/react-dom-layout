@@ -68,7 +68,7 @@ function mergeOdd (propertyName, reg) {
     var arr = propertyName.split(reg);
 
     if (arr.length > 1) {
-        return arr.map((value, index, arr2) => {
+        return arr.map(function (value, index, arr2) {
             return (index % 2 === 0) ? value + arr2[index + 1] : '';
         }).filter(Boolean);
     }

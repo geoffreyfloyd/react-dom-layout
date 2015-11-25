@@ -184,7 +184,7 @@
         return defaults;
     }
 
-    function getRootLayoutContext() {
+    function getRootLayoutContext () {
         if (getRootLayoutContextFunc) {
             return getRootLayoutContextFunc();
         }
@@ -295,7 +295,7 @@
         return value === undefined || value === 'omit';
     }
 
-    function setRootLayoutContext(func) {
+    function setRootLayoutContext (func) {
         getRootLayoutContextFunc = func;
     }
 

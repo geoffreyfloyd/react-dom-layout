@@ -20603,7 +20603,7 @@
 	                layoutContext = this.getRootLayoutContext();
 	                layoutContext = _Object$assign({ fontSize: core.getFontSizeBase(), visible: true }, layoutContext);
 	                // register root
-	                core.getRootLayoutContext = this.getRootLayoutContext;
+	                core.setRootLayoutContext(this.getRootLayoutContext);
 	            } else {
 	                var inherited;
 	                inherited = this.props.layoutContext;
@@ -21004,14 +21004,13 @@
 	         * RENDERING
 	         *************************************************************/
 	        renderLayout: function renderLayout(component) {
-	            var ref = this.props;
 	            /* eslint-disable no-param-reassign */
 	            if (component === void 0 || component === null) {
-	                component = ref.component;
+	                component = this.props.component;
 	            }
 	            /* eslint-enable no-param-reassign */
 
-	            var style = _Object$assign({}, ref.style);
+	            var style = _Object$assign({}, reactUtil.reduceStyle(this.props.style));
 	            var extraProps = {};
 	            var children;
 
@@ -21023,7 +21022,7 @@
 	                    measure = this.measureLayoutForChildren(this.props.children, { width: core.SCROLLBAR_WIDTH });
 	                }
 
-	                extraProps.style = _Object$assign(reactUtil.reduceStyle(style) || {}, measure.containerStyle, localStyle);
+	                extraProps.style = _Object$assign(style, measure.containerStyle, localStyle);
 	                children = this.applyLayoutToChildren(this.props.children, measure);
 	            } else {
 	                extraProps.style = _Object$assign({}, this.props.style || {}, localStyle);
@@ -21510,7 +21509,7 @@
 	})(function (CSS) {
 
 	    // Local variables
-	    var fontSizeBase, getRootLayoutContext;
+	    var fontSizeBase, getRootLayoutContextFunc;
 	    var DIMENSIONS = ['height', 'width'];
 	    var INNER_MODIFIERS = ['border', 'padding'];
 	    var OUTER_MODIFIERS = ['margin'];
@@ -21682,6 +21681,14 @@
 	        return defaults;
 	    }
 
+	    function getRootLayoutContext() {
+	        if (getRootLayoutContextFunc) {
+	            return getRootLayoutContextFunc();
+	        } else {
+	            throw Error('Root layout context function not set');
+	        }
+	    }
+
 	    function getSizeModifiers(style, props, context) {
 	        var size = {
 	            height: 0,
@@ -21741,6 +21748,11 @@
 	     */
 	    function isLayout(component) {
 	        var result = false;
+
+	        if (component === void 0 || component === null) {
+	            return false;
+	        }
+
 	        try {
 	            result = (component.constructor !== void 0 && component.constructor !== null ? component.constructor.isReactDomLayout : void 0) || (component.type !== void 0 && component.type !== null ? component.type.isReactDomLayout : void 0);
 
@@ -21768,6 +21780,10 @@
 
 	    function layoutIsOmitted(value) {
 	        return value === void 0 || value === 'omit';
+	    }
+
+	    function setRootLayoutContext(func) {
+	        getRootLayoutContextFunc = func;
 	    }
 
 	    /*************************************************************
@@ -21851,7 +21867,8 @@
 	        isLayout: isLayout,
 	        layoutIsFixed: layoutIsFixed,
 	        layoutIsFlex: layoutIsFlex,
-	        layoutIsOmitted: layoutIsOmitted
+	        layoutIsOmitted: layoutIsOmitted,
+	        setRootLayoutContext: setRootLayoutContext
 	    };
 	});
 
