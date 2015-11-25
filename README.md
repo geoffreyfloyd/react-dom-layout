@@ -31,7 +31,7 @@ The value of layoutHeight and layoutWidth can be set to `flex`, `omit`, or a fix
 - "10vh" - percent based on height of the root layout
 - "10vw" - percent based on width of the root layout
 
-Additionally, "flex" supports minimum and maximum dimensions, such as:
+Additionally, "flex" supports minimum and maximum dimensions, in the format "flex:min:max", such as:
 
 - "flex:2em" - minimum of 2em, no maximum.
 - "flex::10em" - no minimum, maximum of 10em.
