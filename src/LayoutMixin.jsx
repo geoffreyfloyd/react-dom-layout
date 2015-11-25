@@ -36,7 +36,7 @@
                 layoutContext = this.getRootLayoutContext();
                 layoutContext = Object.assign({ fontSize: core.getFontSizeBase(), visible: true }, layoutContext);
                 // register root
-                core.getRootLayoutContext = this.getRootLayoutContext;
+                core.setRootLayoutContext(this.getRootLayoutContext);
             }
             else {
                 var inherited;

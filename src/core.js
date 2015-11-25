@@ -5,7 +5,7 @@
 }(function (CSS) {
 
     // Local variables
-    var fontSizeBase, getRootLayoutContext;
+    var fontSizeBase, getRootLayoutContextFunc;
     var DIMENSIONS = ['height', 'width'];
     var INNER_MODIFIERS = ['border', 'padding'];
     var OUTER_MODIFIERS = ['margin'];
@@ -184,6 +184,15 @@
         return defaults;
     }
 
+    function getRootLayoutContext() {
+        if (getRootLayoutContextFunc) {
+            return getRootLayoutContextFunc();
+        }
+        else {
+            throw Error('Root layout context function not set');
+        }
+    }
+
     function getSizeModifiers (style, props, context) {
         var size = {
             height: 0,
@@ -281,6 +290,10 @@
         return value === undefined || value === 'omit';
     }
 
+    function setRootLayoutContext(func) {
+        getRootLayoutContextFunc = func;
+    }
+
     /*************************************************************
      * INTERNAL METHODS
      *************************************************************/
@@ -370,6 +383,7 @@
         isLayout: isLayout,
         layoutIsFixed: layoutIsFixed,
         layoutIsFlex: layoutIsFlex,
-        layoutIsOmitted: layoutIsOmitted
+        layoutIsOmitted: layoutIsOmitted,
+        setRootLayoutContext: setRootLayoutContext
     };
 }));
