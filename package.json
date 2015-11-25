@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "karma start ./karma.travis.conf.js",
-    "testall": "karma start"
+    "testall": "karma start ./karma.conf.js",
+    "debugtest": "karma start ./karma.debug.conf.js"
   },
   "keywords": [
     "react",
