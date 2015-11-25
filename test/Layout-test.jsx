@@ -1,15 +1,15 @@
 ﻿(function (factory) {
     var React = require('react/addons'),
-        TestUtils = React.addons.TestUtils,
+        ReactTestUtils = React.addons.TestUtils,
         core = require('../src/core'),
         WindowSizeLayout = require('../src/WindowSizeLayout'),
         Layout = require('../src/Layout'),
         SplitLayout = require('../src/SplitLayout');
 
     module.exports = exports = factory(
-        React, TestUtils, core, WindowSizeLayout, Layout, SplitLayout
+        React, ReactTestUtils, core, WindowSizeLayout, Layout, SplitLayout
     );
-}(function (React, TestUtils, core, WindowSizeLayout, Layout, SplitLayout) {
+}(function (React, ReactTestUtils, core, WindowSizeLayout, Layout, SplitLayout) {
 
     var container = {
         padding: '0.3125rem'
@@ -32,7 +32,7 @@
     });
 
     // Create a Layout component
-    var layoutBorders = TestUtils.renderIntoDocument(
+    var layoutBorders = ReactTestUtils.renderIntoDocument(
         <WindowSizeLayout>
             <Layout id="firstLayout" style={{border: '1px'}}>
                 <div layoutHeight="inherit" id="firstLayoutChild_InheritHeightNonLayout">one</div>
@@ -41,7 +41,7 @@
         </WindowSizeLayout>
     );
 
-    var layoutPadding = TestUtils.renderIntoDocument(
+    var layoutPadding = ReactTestUtils.renderIntoDocument(
         <WindowSizeLayout>
             <Layout id="firstLayout" style={{padding: '1px'}}>
                 <div layoutHeight="inherit" id="firstLayoutChild">one</div>
@@ -49,7 +49,7 @@
         </WindowSizeLayout>
     );
 
-    var layoutMargin = TestUtils.renderIntoDocument(
+    var layoutMargin = ReactTestUtils.renderIntoDocument(
         <WindowSizeLayout>
             <Layout id="firstLayout" style={{margin: '1px'}}>
                 <div layoutHeight="inherit" id="firstLayoutChild">one</div>
@@ -57,7 +57,7 @@
         </WindowSizeLayout>
     );
 
-    var layoutComponent = TestUtils.renderIntoDocument(
+    var layoutComponent = ReactTestUtils.renderIntoDocument(
         <WindowSizeLayout>
             <TestComponent id="firstLayout" style={{margin: '1px'}} />
         </WindowSizeLayout>
@@ -65,7 +65,7 @@
 
     describe("Components", function () {
         it('should retain style props', function () {
-            var layout = TestUtils.scryRenderedComponentsWithType(layoutComponent, Layout)[0];
+            var layout = ReactTestUtils.scryRenderedComponentsWithType(layoutComponent, Layout)[0];
             expect(layout.props.style.padding).to.equal('0.3125rem');
         });
     });
@@ -82,7 +82,7 @@
 
 
         // Asserting behavior with borders
-        TestUtils.findAllInRenderedTree(layoutBorders, function (component) {
+        ReactTestUtils.findAllInRenderedTree(layoutBorders, function (component) {
             if (component.props.id === 'firstLayout') {
                 it('should inherit height and width from parent layout', function () {
                     expect(component.props.layoutContext.height).to.equal(windowSize.height);
@@ -108,7 +108,7 @@
         });
         
         // Asserting behavior with padding
-        TestUtils.findAllInRenderedTree(layoutPadding, function (component) {
+        ReactTestUtils.findAllInRenderedTree(layoutPadding, function (component) {
             if (component.props.id === 'firstLayoutChild') {
                 it('should subtract from available dimension when padding style is used', function () {
                     expect(component.props.style.height).to.equal(windowSize.height - 2);
@@ -117,7 +117,7 @@
         });
 
         // Asserting behavior with margin
-        TestUtils.findAllInRenderedTree(layoutMargin, function (component) {
+        ReactTestUtils.findAllInRenderedTree(layoutMargin, function (component) {
             if (component.props.id === 'firstLayoutChild') {
                 it('should subtract from available dimension when margin style is used', function () {
                     expect(component.props.style.height).to.equal(windowSize.height - 2);

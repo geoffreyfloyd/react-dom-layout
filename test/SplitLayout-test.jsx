@@ -1,17 +1,17 @@
 ﻿(function (factory) {
     var React = require('react/addons'),
-        TestUtils = React.addons.TestUtils,
+        ReactTestUtils = React.addons.TestUtils,
         core = require('../src/core'),
         WindowSizeLayout = require('../src/WindowSizeLayout'),
         Layout = require('../src/Layout'),
         SplitLayout = require('../src/SplitLayout');
 
     module.exports = exports = factory(
-        React, TestUtils, core, WindowSizeLayout, Layout, SplitLayout
+        React, ReactTestUtils, core, WindowSizeLayout, Layout, SplitLayout
     );
-}(function (React, TestUtils, core, WindowSizeLayout, Layout, SplitLayout) {
+}(function (React, ReactTestUtils, core, WindowSizeLayout, Layout, SplitLayout) {
 
-    var layoutSplit = TestUtils.renderIntoDocument(
+    var layoutSplit = ReactTestUtils.renderIntoDocument(
         <WindowSizeLayout id="rootLayout">
             <SplitLayout id="firstLayout" style={{margin: '1px'}}>
                 <div layoutHeight="inherit" layoutWidth="inherit" id="firstLayoutChild">one</div>
@@ -24,11 +24,11 @@
 
         var width1, width2;
 
-        TestUtils.findAllInRenderedTree(layoutSplit, function (component) {
-            if (component.props.id === 'firstLayoutChild' && TestUtils.isCompositeComponent(component)) {
+        ReactTestUtils.findAllInRenderedTree(layoutSplit, function (component) {
+            if (component.props.id === 'firstLayoutChild' && ReactTestUtils.isCompositeComponent(component)) {
                 width1 = component.props.style.width;
             }
-            else if (component.props.id === 'secondLayoutChild' && TestUtils.isCompositeComponent(component)) {
+            else if (component.props.id === 'secondLayoutChild' && ReactTestUtils.isCompositeComponent(component)) {
                 width2 = component.props.style.width;
             }
         });
