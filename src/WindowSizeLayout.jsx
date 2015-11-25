@@ -38,13 +38,15 @@
         componentWillMount: function () {
             // clear margin on body
             try {
-                var margin = window.getComputedStyle(document.body).getPropertyValue("margin");
+                var margin = window.getComputedStyle(document.body).getPropertyValue('margin');
                 if (margin) {
-                    document.body.style.margin = "0px";
-                    document.body.style.fontSize = "100%";
+                    document.body.style.margin = '0px';
+                    document.body.style.fontSize = '100%';
                 }
             }
-            catch (e) {}
+            catch (e) {
+                console.error(e);
+            }
 
             /**
             * Create a filtered event handler
@@ -56,7 +58,7 @@
 
             this.handlers.windowSizeChange
                 .debounce(100)
-                //.distinctUntilChanged() // sometimes we want to force a refresh due to scrollbars appearing or disappearing
+                // .distinctUntilChanged() // sometimes we want to force a refresh due to scrollbars appearing or disappearing
                 .subscribe(this.handleStoreUpdate);
 
             // Subscribe to stores
@@ -98,18 +100,16 @@
          * RENDERING HELPERS
          *************************************************************/
         getRootLayoutContext: function () {
-            // funky things happen when we rely on getClientSize for height
+            /**
+             * Funky results sometimes occur when we rely on getClientSize for height,
+             * so we will only get window size until we have time to figure out when and
+             * why it becomes unreliable.
+             */
             return {
                 height: windowSizeStore.getWindowSize().height,
                 width: windowSizeStore.getClientSize().width < windowSizeStore.getWindowSize().width && Math.abs(windowSizeStore.getClientSize().width - windowSizeStore.getWindowSize().width) < 100 ?
                     windowSizeStore.getClientSize().width : windowSizeStore.getWindowSize().width
             };
-            // return {
-            //     height: windowSizeStore.getClientSize().height < windowSizeStore.getWindowSize().height && Math.abs(windowSizeStore.getClientSize().height - windowSizeStore.getWindowSize().height) < 100 ?
-            //         windowSizeStore.getClientSize().height : windowSizeStore.getWindowSize().height,
-            //     width: windowSizeStore.getClientSize().width < windowSizeStore.getWindowSize().width && Math.abs(windowSizeStore.getClientSize().width - windowSizeStore.getWindowSize().width) < 100 ?
-            //         windowSizeStore.getClientSize().width : windowSizeStore.getWindowSize().width
-            // };
         },
 
         /*************************************************************

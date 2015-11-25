@@ -7,7 +7,7 @@
     /**
      * Safely iterate any known react children structure
      */
-    function reactForEach(children, func) {
+    function reactForEach (children, func) {
         if (Array.isArray(children)) {
             children.forEach(func);
         }
@@ -22,7 +22,7 @@
     /**
      * Safely map any known react children structure
      */
-    function reactMap(children, func) {
+    function reactMap (children, func) {
         if (Array.isArray(children)) {
             return children.map(func);
         }
@@ -38,7 +38,7 @@
      * Reduce an array of objects into one style object
      * (React cannot yet natively handle style arrays)
      */
-    function reduceStyle(style) {
+    function reduceStyle (style) {
         if (Array.isArray(style)) {
             var reduce = {};
             style.forEach(function (s) {

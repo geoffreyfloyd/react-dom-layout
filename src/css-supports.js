@@ -1,6 +1,6 @@
-﻿/*! CSS.supports() Polyfill
-* https://gist.github.com/codler/03a0995195aa2859465f
-* Copyright (c) 2014 Han Lin Yap http://yap.nu; MIT license */
+﻿/**
+ *  CSS.supports() Polyfill - Adapted from https://gist.github.com/codler/03a0995195aa2859465f
+ */
 
 if (window) {
     if (!('CSS' in window)) {
@@ -11,47 +11,20 @@ if (window) {
         window.CSS._cacheSupports = {};
         window.CSS.supports = function (propertyName, value) {
             var key = [propertyName, value].toString();
+
+            // Return cached value if exists
             if (key in window.CSS._cacheSupports) {
                 return window.CSS._cacheSupports[key];
             }
 
-            function cssSupports (propertyName, value) {
-                var style = document.createElement('div').style;
+            // Check if propertyName/value combo is supported
+            var supported = cssSupports(propertyName, value);
 
-                // 1 argument
-                if (value === undefined) {
-                    function mergeOdd (propertyName, reg) {
-                        var arr = propertyName.split(reg);
+            // Assign to cache
+            window.CSS._cacheSupports[key] = supported;
 
-                        if (arr.length > 1) {
-                            return arr.map(function (value, index, arr) {
-                                return (index % 2 === 0) ? value + arr[index + 1] : '';
-                            }).filter(Boolean);
-                        }
-                    }
-
-                    // The regex will do this '( a:b ) or ( c:d )' => ["( a:b ", ")", "(", " c:d )"]
-                    var arrOr = mergeOdd(propertyName, /([)])\s*or\s*([(])/gi);
-                    if (arrOr) {
-                        return arrOr.some(function (supportsCondition) { return window.CSS.supports(supportsCondition); });
-                    }
-                    var arrAnd = mergeOdd(propertyName, /([)])\s*and\s*([(])/gi);
-                    if (arrAnd) {
-                        return arrAnd.every(function (supportsCondition) { return window.CSS.supports(supportsCondition); });
-                    }
-
-                    // Remove the first and last parentheses
-                    style.cssText = propertyName.replace('(', '').replace(/[)]$/, '');
-                    // 2 arguments
-                }
-                else {
-                    style.cssText = propertyName + ':' + value;
-                }
-
-                return !!style.length;
-            }
-
-            return window.CSS._cacheSupports[key] = cssSupports(propertyName, value);
+            // Return value
+            return supported;
         };
     }
 
@@ -63,4 +36,40 @@ else {
             console.error('Not supported outside of DOM');
         }
     };
+}
+
+function cssSupports (propertyName, value) {
+    var style = document.createElement('div').style;
+
+    // 1 argument
+    if (value === undefined) {
+        // The regex will do this '( a:b ) or ( c:d )' => ["( a:b ", ")", "(", " c:d )"]
+        var arrOr = mergeOdd(propertyName, /([)])\s*or\s*([(])/gi);
+        if (arrOr) {
+            return arrOr.some(function (supportsCondition) { return window.CSS.supports(supportsCondition); });
+        }
+        var arrAnd = mergeOdd(propertyName, /([)])\s*and\s*([(])/gi);
+        if (arrAnd) {
+            return arrAnd.every(function (supportsCondition) { return window.CSS.supports(supportsCondition); });
+        }
+
+        // Remove the first and last parentheses
+        style.cssText = propertyName.replace('(', '').replace(/[)]$/, '');
+        // 2 arguments
+    }
+    else {
+        style.cssText = propertyName + ':' + value;
+    }
+
+    return !!style.length;
+}
+
+function mergeOdd (propertyName, reg) {
+    var arr = propertyName.split(reg);
+
+    if (arr.length > 1) {
+        return arr.map((value, index, arr2) => {
+            return (index % 2 === 0) ? value + arr2[index + 1] : '';
+        }).filter(Boolean);
+    }
 }

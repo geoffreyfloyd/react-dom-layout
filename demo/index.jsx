@@ -13,13 +13,7 @@
          * RENDERING
          *************************************************************/
         render: function () {
-            var breakpoints = [
-                { when: 'parent.width <= 15rem', then: {width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red'}}},
-                { when: 'parent.width >=< 15rem:20rem', then: {width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green'}}},
-                { when: 'parent.width >=< 25rem:30rem', min: '25rem', max: '30rem', then: {width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue'}}},
-                { when: 'parent.width > 30rem', then: {width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple'}}},
-                { when: 'self.width > 800px', then: {style: { fontSize: '0.75rem', color: 'orange'}}},
-            ];
+
             return (
                 <WindowSizeLayout style={styles.border}>
                     <SplitLayout flex="flex:400px" containerStyle={styles.border}>
@@ -30,6 +24,13 @@
             );
         },
         renderOld: function () {
+            var breakpoints = [
+                { when: 'parent.width <= 15rem', then: {width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red'}}},
+                { when: 'parent.width >=< 15rem:20rem', then: {width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green'}}},
+                { when: 'parent.width >=< 25rem:30rem', min: '25rem', max: '30rem', then: {width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue'}}},
+                { when: 'parent.width > 30rem', then: {width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple'}}},
+                { when: 'self.width > 800px', then: {style: { fontSize: '0.75rem', color: 'orange'}}},
+            ];
             return (
                 <WindowSizeLayout>
                     {/* Top Half */}
@@ -65,10 +66,12 @@
     };
 
     var range = function (start, end) {
+        /* eslint-disable no-param-reassign */
         if (end === undefined) {
             end = start;
             start = 1;
         }
+        /* eslint-enable no-param-reassign */
 
         var rng = [];
         for (var i = start; i <= end; i++) {

@@ -47,7 +47,7 @@
 	'use strict';
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(157), __webpack_require__(175), __webpack_require__(176));
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(157), __webpack_require__(177), __webpack_require__(178));
 	})(function (React, Layout, SplitLayout, WindowSizeLayout) {
 	    'use strict';
 	    var Demo = React.createClass({
@@ -57,7 +57,7 @@
 	         * RENDERING
 	         *************************************************************/
 	        render: function render() {
-	            var breakpoints = [{ when: 'parent.width <= 15rem', then: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { when: 'parent.width >=< 15rem:20rem', then: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { when: 'parent.width >=< 25rem:30rem', min: '25rem', max: '30rem', then: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { when: 'parent.width > 30rem', then: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { when: 'self.width > 800px', then: { style: { fontSize: '0.75rem', color: 'orange' } } }];
+
 	            return React.createElement(
 	                WindowSizeLayout,
 	                { style: styles.border },
@@ -78,6 +78,7 @@
 	            );
 	        },
 	        renderOld: function renderOld() {
+	            var breakpoints = [{ when: 'parent.width <= 15rem', then: { width: 'flex:5rem:7.5rem', style: { fontSize: '0.75rem', color: 'red' } } }, { when: 'parent.width >=< 15rem:20rem', then: { width: 'flex:7.5rem:10rem', style: { fontSize: '0.75rem', color: 'green' } } }, { when: 'parent.width >=< 25rem:30rem', min: '25rem', max: '30rem', then: { width: 'flex:12.5rem:15rem', style: { fontSize: '0.75rem', color: 'blue' } } }, { when: 'parent.width > 30rem', then: { width: 'flex:15rem:30rem', style: { fontSize: '0.75rem', color: 'purple' } } }, { when: 'self.width > 800px', then: { style: { fontSize: '0.75rem', color: 'orange' } } }];
 	            return React.createElement(
 	                WindowSizeLayout,
 	                null,
@@ -133,10 +134,12 @@
 	    };
 
 	    var range = function range(start, end) {
+	        /* eslint-disable no-param-reassign */
 	        if (end === void 0) {
 	            end = start;
 	            start = 1;
 	        }
+	        /* eslint-enable no-param-reassign */
 
 	        var rng = [];
 	        for (var i = start; i <= end; i++) {
@@ -20567,26 +20570,15 @@
 	var _Object$assign = __webpack_require__(159)['default'];
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(174));
-	})(function (React, CSS) {
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(174), __webpack_require__(175));
+	})(function (React, reactUtil, core) {
 	    // many thanks to https://github.com/jsdf/react-layout for base of layout logic
-	    var DIMENSIONS = ['height', 'width'];
-	    var INNER_MODIFIERS = ['border', 'padding'];
-	    var OUTER_MODIFIERS = ['margin'];
-	    var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
-	    var SCROLLBAR_WIDTH = 22;
-	    var FLEX = ['flex', '-webkit-flex;', '-ms-flexbox', '-moz-box', '-webkit-box'];
-
-	    var fontSizeBase, getRootLayoutContext;
 
 	    var LayoutMixin = {
 	        /*************************************************************
 	         * DEFINITIONS
 	         *************************************************************/
-	        contextTypes: {
-	            layoutContext: React.PropTypes.object
-	        },
-	        childContextTypes: {
+	        propTypes: {
 	            layoutContext: React.PropTypes.object
 	        },
 	        statics: {
@@ -20609,9 +20601,9 @@
 
 	            if (this.getRootLayoutContext) {
 	                layoutContext = this.getRootLayoutContext();
-	                layoutContext = _Object$assign({ fontSize: getFontSizeBase(), visible: true }, layoutContext);
+	                layoutContext = _Object$assign({ fontSize: core.getFontSizeBase(), visible: true }, layoutContext);
 	                // register root
-	                getRootLayoutContext = this.getRootLayoutContext;
+	                core.getRootLayoutContext = this.getRootLayoutContext;
 	            } else {
 	                var inherited;
 	                inherited = this.props.layoutContext;
@@ -20619,17 +20611,17 @@
 	                    layoutContext = _Object$assign({}, inherited);
 	                } else {
 	                    layoutContext = {
-	                        width: isNumber(this.props.layoutWidth) ? this.props.layoutWidth : void 0,
-	                        height: isNumber(this.props.layoutHeight) ? this.props.layoutHeight : void 0,
-	                        fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : void 0,
+	                        width: core.isNumber(this.props.layoutWidth) ? this.props.layoutWidth : void 0,
+	                        height: core.isNumber(this.props.layoutHeight) ? this.props.layoutHeight : void 0,
+	                        fontSize: core.isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : void 0,
 	                        visible: this.props.layoutVisible || true
 	                    };
 	                }
 	            }
 
 	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(reduceStyle(this.props.style), OUTER_MODIFIERS, layoutContext);
-	                DIMENSIONS.forEach(function (dim) {
+	                var sizeModifiers = core.getSizeModifiers(reactUtil.reduceStyle(this.props.style), core.OUTER_MODIFIERS, layoutContext);
+	                core.DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
 	                        layoutContext[dim] -= sizeModifiers[dim];
 	                    }
@@ -20643,7 +20635,7 @@
 	            var layoutContext = _Object$assign({}, this.getLayoutContext());
 
 	            if (subtract) {
-	                DIMENSIONS.forEach(function (dim) {
+	                core.DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim] && subtract[dim]) {
 	                        layoutContext[dim] -= subtract[dim];
 	                    }
@@ -20651,20 +20643,13 @@
 	            }
 
 	            if (this.props.style) {
-	                var sizeModifiers = getSizeModifiers(reduceStyle(this.props.style), INNER_MODIFIERS, layoutContext);
-	                DIMENSIONS.forEach(function (dim) {
+	                var sizeModifiers = core.getSizeModifiers(reactUtil.reduceStyle(this.props.style), core.INNER_MODIFIERS, layoutContext);
+	                core.DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
 	                        layoutContext[dim] -= sizeModifiers[dim];
 	                    }
 	                });
 	            }
-
-	            //var breakpoint = {};
-	            //applyBreakpoints(this, breakpoint, layoutContext, 'self');
-
-	            //if (breakpoint.options) {
-	            //    Object.assign(layoutContext, breakpoint.options);
-	            //}
 
 	            return layoutContext;
 	        },
@@ -20677,12 +20662,11 @@
 
 	            local = {};
 	            layoutContext = this.getLayoutContext();
-	            guardLayoutContext(layoutContext);
 
 	            if (layoutContext) {
 	                local.visible = layoutContext.visible;
 	                local.fontSize = layoutContext.fontSize;
-	                DIMENSIONS.forEach(function (dim) {
+	                core.DIMENSIONS.forEach(function (dim) {
 	                    if (layoutContext[dim]) {
 	                        local[dim] = layoutContext[dim];
 	                    }
@@ -20690,18 +20674,17 @@
 	            }
 
 	            if (subtract) {
-	                DIMENSIONS.forEach(function (dim) {
+	                core.DIMENSIONS.forEach(function (dim) {
 	                    if (subtract[dim] && local[dim]) {
 	                        local[dim] -= subtract[dim];
 	                    }
 	                });
 	            }
 
-	            var breakpoint = {};
-	            applyBreakpoints(this, breakpoint, local, 'self');
+	            var breakpointLayout = core.getBreakpointLayout(this, { self: local });
 
-	            if (breakpoint.style) {
-	                _Object$assign(local, breakpoint.style);
+	            if (breakpointLayout.style) {
+	                _Object$assign(local, breakpointLayout.style);
 	            }
 
 	            if (local.visible === false) {
@@ -20716,7 +20699,6 @@
 	        measureLayoutForChildren: function measureLayoutForChildren(children, subtract) {
 	            var parentLayout, layout;
 	            parentLayout = this.getParentLayout(subtract);
-	            guardLayoutContext(parentLayout);
 
 	            // wrap
 	            var newWrap = function newWrap(available) {
@@ -20726,7 +20708,7 @@
 	                };
 	            };
 
-	            layout = DIMENSIONS.reduce(function (lay, dim) {
+	            layout = core.DIMENSIONS.reduce(function (lay, dim) {
 	                lay[dim] = {
 	                    wraps: [newWrap(parentLayout[dim])]
 	                };
@@ -20737,7 +20719,7 @@
 	            layout.styles = [];
 
 	            // Measure
-	            reactForEach(children, function (child) {
+	            reactUtil.reactForEach(children, function (child) {
 	                var childLayout;
 
 	                if (child) {
@@ -20753,39 +20735,35 @@
 	                        // add style that may have been applied from breakpoint
 	                        layout.styles.push(childLayout.style || {});
 	                    } else {
-	                        //return;
+	                        // add an empty style
 	                        layout.styles.push({});
-	                        //debugger;
 	                    }
 	                }
-	                // else {
-	                //     return;
-	                // }
 
-	                DIMENSIONS.forEach(function (dim) {
+	                core.DIMENSIONS.forEach(function (dim) {
 	                    // get currect wrap
 	                    var wrap = layout[dim].wraps[layout[dim].wraps.length - 1];
 
 	                    var arg;
 	                    var calculate = true;
-	                    var fontSize = childLayout && childLayout.fontSize ? convertToPixels(childLayout.fontSize, parentLayout, dim) : parentLayout.fontSize;
+	                    var fontSize = childLayout && childLayout.fontSize ? core.convertToPixels(childLayout.fontSize, parentLayout, dim) : parentLayout.fontSize;
 	                    var min = 1;
 
 	                    if (!child || !childLayout || childLayout[dim] === void 0 || childLayout[dim] === 'omit') {
 	                        arg = childLayout ? childLayout[dim] : void 0;
 	                        min = 0;
 	                        calculate = false;
-	                    } else if (layoutIsFixed(childLayout[dim], parentLayout, dim)) {
+	                    } else if (core.layoutIsFixed(childLayout[dim], parentLayout, dim)) {
 	                        // fixed is min
 	                        arg = childLayout[dim];
-	                        min = convertToPixels(childLayout[dim], parentLayout, dim);
+	                        min = core.convertToPixels(childLayout[dim], parentLayout, dim);
 	                        calculate = false;
-	                    } else if (layoutIsFlex(childLayout[dim])) {
+	                    } else if (core.layoutIsFlex(childLayout[dim])) {
 	                        // check for flex min
 	                        arg = childLayout[dim];
 	                        var flexParams = childLayout[dim].split(':');
 	                        if (flexParams.length > 1 && flexParams[1] !== '') {
-	                            min = convertToPixels(flexParams[1], parentLayout, dim);
+	                            min = core.convertToPixels(flexParams[1], parentLayout, dim);
 	                        }
 	                    } else {
 	                        // inherit and all else  if (childLayout[dim] === 'inherit')
@@ -20818,7 +20796,7 @@
 	            };
 
 	            // second pass
-	            DIMENSIONS.forEach(function (dim) {
+	            core.DIMENSIONS.forEach(function (dim) {
 	                layout[dim].wraps.forEach(function (wrap) {
 	                    var uncalculatedElements = wrap.elements.filter(uncalculated).length;
 	                    if (uncalculatedElements > 0) {
@@ -20827,7 +20805,7 @@
 	                        wrap.elements.filter(uncalculated).forEach(function (element) {
 	                            var flexArgs = element.arg.split(':');
 	                            if (flexArgs.length > 2 && flexArgs[2] !== '') {
-	                                var max = convertToPixels(flexArgs[2], parentLayout, dim);
+	                                var max = core.convertToPixels(flexArgs[2], parentLayout, dim);
 	                                if (max < evenDistrib + element.measure) {
 	                                    var maxAvail = max - element.measure;
 	                                    element.measure += maxAvail;
@@ -20859,10 +20837,10 @@
 	            });
 
 	            var containerStyle = {};
-	            var options = getLayoutOptions(this, parentLayout);
+	            var options = core.getLayoutOptions(this, parentLayout);
 	            if (options.allowFlex && (needsFlex(layout.width.wraps) || needsWrap(layout.width.wraps))) {
 
-	                containerStyle.display = getFlex();
+	                containerStyle.display = core.getFlex();
 	                if (options.allowFlexWrap) {
 	                    containerStyle.flexWrap = 'wrap';
 	                } else {
@@ -20901,7 +20879,7 @@
 	                if (measure.layout.styles[childIndex] !== void 0 && measure.layout.styles[childIndex].visible !== void 0 && measure.layout.styles[childIndex].visible === false) {
 
 	                    childIndex++;
-	                    if (isReactLayout(child)) {
+	                    if (core.isLayout(child)) {
 	                        return React.cloneElement(child, {
 	                            layoutContext: _Object$assign(child.props.layoutContext || {}, {
 	                                visible: false
@@ -20930,13 +20908,13 @@
 	                layout = _Object$assign({}, measure.parentLayout);
 
 	                var hasLayout = false;
-	                DIMENSIONS.forEach(function (dim) {
+	                core.DIMENSIONS.forEach(function (dim) {
 	                    var wrap = getWrap(childIndex, measure.layout[dim].wraps);
 	                    if (wrap) {
 	                        if (wrap.elements[wrap.currentIndex].arg !== void 0) {
 	                            hasLayout = true;
 	                            // Apply dimension
-	                            if (layoutIsOmitted(wrap.elements[wrap.currentIndex].arg)) {
+	                            if (core.layoutIsOmitted(wrap.elements[wrap.currentIndex].arg)) {
 	                                delete layout[dim];
 	                            } else {
 	                                layout[dim] = wrap.elements[wrap.currentIndex].measure;
@@ -20950,7 +20928,7 @@
 	                    }
 	                });
 
-	                if (isReactLayout(child)) {
+	                if (core.isLayout(child)) {
 	                    // if it is a react layout then
 	                    // pass a layout context and
 	                    // allow it to set its own style props
@@ -20984,7 +20962,7 @@
 
 	                    // resolve style
 	                    // we don't want min and max dims in our style
-	                    var style = _Object$assign({}, reduceStyle(child.props.style), layoutStyle, breakpointStyle);
+	                    var style = _Object$assign({}, reactUtil.reduceStyle(child.props.style), layoutStyle, breakpointStyle);
 	                    var removeProps = ['minWidth', 'maxWidth', 'minHeight', 'maxHeight'];
 	                    removeProps.forEach(function (p) {
 	                        if (style[p]) {
@@ -20995,8 +20973,8 @@
 	                    // non-layout components need to account for margin
 	                    // because it won't get it's own render pass to call
 	                    // getLayoutContext, which accounts for margin
-	                    var sizeModifiers = getSizeModifiers(style, OUTER_MODIFIERS, measure.parentLayout);
-	                    DIMENSIONS.forEach(function (dim) {
+	                    var sizeModifiers = core.getSizeModifiers(style, core.OUTER_MODIFIERS, measure.parentLayout);
+	                    core.DIMENSIONS.forEach(function (dim) {
 	                        if (style[dim]) {
 	                            style[dim] -= sizeModifiers[dim];
 	                        }
@@ -21019,7 +20997,7 @@
 	             * special type of children object the keys get doubled
 	             * up. Besides this, it is faster to iterate the array.
 	             */
-	            return reactMap(children, processChild);
+	            return reactUtil.reactMap(children, processChild);
 	        },
 
 	        /*************************************************************
@@ -21027,9 +21005,12 @@
 	         *************************************************************/
 	        renderLayout: function renderLayout(component) {
 	            var ref = this.props;
+	            /* eslint-disable no-param-reassign */
 	            if (component === void 0 || component === null) {
 	                component = ref.component;
 	            }
+	            /* eslint-enable no-param-reassign */
+
 	            var style = _Object$assign({}, ref.style);
 	            var extraProps = {};
 	            var children;
@@ -21039,16 +21020,15 @@
 	            if (localStyle.display === void 0 || localStyle.display !== 'none') {
 	                var measure = this.measureLayoutForChildren(this.props.children);
 	                if (measure.needsScrollbar) {
-	                    measure = this.measureLayoutForChildren(this.props.children, { width: SCROLLBAR_WIDTH });
+	                    measure = this.measureLayoutForChildren(this.props.children, { width: core.SCROLLBAR_WIDTH });
 	                }
 
-	                extraProps.style = _Object$assign(reduceStyle(style) || {}, measure.containerStyle, localStyle);
+	                extraProps.style = _Object$assign(reactUtil.reduceStyle(style) || {}, measure.containerStyle, localStyle);
 	                children = this.applyLayoutToChildren(this.props.children, measure);
 	            } else {
 	                extraProps.style = _Object$assign({}, this.props.style || {}, localStyle);
 	            }
 
-	            //extraProps.children = this.props.children;
 	            return component(_Object$assign({}, this.props, extraProps), children);
 	        }
 	    };
@@ -21056,13 +21036,23 @@
 	    /*************************************************************
 	     * INTERNAL METHODS
 	     *************************************************************/
+	    /**
+	     * Filter unmanaged layout elements
+	     */
+	    function filterUnmanaged(element) {
+	        return element.measure === 0;
+	    }
+
 	    function getWrap(index, wraps) {
 	        var wrap;
 	        var wrapsIndex = 0;
 	        while (!wrap && wrapsIndex < wraps.length) {
 	            if (wraps[wrapsIndex].elements.length < index + 1) {
-	                // move on to the next wrap
+	                /* eslint-disable no-param-reassign */
 	                index -= wraps[wrapsIndex].elements.length;
+	                /* eslint-enable no-param-reassign */
+
+	                // move on to the next wrap
 	                wrapsIndex++;
 	            } else {
 	                // add true childindex to wrap object
@@ -21073,26 +21063,6 @@
 	        return wrap;
 	    }
 
-	    function reactForEach(children, func) {
-	        if (Array.isArray(children)) {
-	            children.forEach(func);
-	        } else if (React.isValidElement(children)) {
-	            func(children);
-	        } else {
-	            React.Children.forEach(children, func);
-	        }
-	    }
-
-	    function reactMap(children, func) {
-	        if (Array.isArray(children)) {
-	            return children.map(func);
-	        } else if (React.isValidElement(children)) {
-	            return func(children);
-	        } else {
-	            return React.Children.map(children, func);
-	        }
-	    }
-
 	    function getChildLayout(component, context) {
 	        var defaultSetting, definition, prop;
 
@@ -21101,7 +21071,7 @@
 	            return;
 	        }
 
-	        if (isReactLayout(component)) {
+	        if (core.isLayout(component)) {
 	            defaultSetting = 'inherit';
 	            definition = {
 	                height: component.props.layoutHeight,
@@ -21128,7 +21098,7 @@
 	            }
 
 	            if (definition.fontSize && definition.fontSize === 'omit') {
-	                definition.fontSize = getFontSizeBase();
+	                definition.fontSize = core.getFontSizeBase();
 	            }
 
 	            if (definition.width || definition.height) {
@@ -21153,92 +21123,14 @@
 	        /**
 	         * Apply breakpoint to definition
 	         */
-	        applyBreakpoints(component, definition, context, 'parent');
+	        _Object$assign(definition, core.getBreakpointLayout(component, { parent: context }));
 
 	        return definition;
 	    }
 
-	    function applyBreakpoints(component, definition, context, contextName) {
-	        // apply breakpoint layout
-	        if (component.props && component.props.layoutBreakpoints && component.props.layoutBreakpoints.length) {
-	            component.props.layoutBreakpoints.map(parseBreakpoint).filter(function (bp) {
-	                return bp.ctx === contextName;
-	            }).forEach(function (breakpoint) {
-
-	                var test = false;
-	                switch (breakpoint.eq) {
-	                    case '=':
-	                    case '==':
-	                    case '===':
-	                        test = context[breakpoint.prop] === convertToPixels(breakpoint.val, context, breakpoint.prop);
-	                        break;
-	                    case '<':
-	                        test = context[breakpoint.prop] < convertToPixels(breakpoint.val, context, breakpoint.prop);
-	                        break;
-	                    case '>':
-	                        test = context[breakpoint.prop] > convertToPixels(breakpoint.val, context, breakpoint.prop);
-	                        break;
-	                    case '<=':
-	                        test = context[breakpoint.prop] <= convertToPixels(breakpoint.val, context, breakpoint.prop);
-	                        break;
-	                    case '>=':
-	                        test = context[breakpoint.prop] >= convertToPixels(breakpoint.val, context, breakpoint.prop);
-	                        break;
-	                    case '><':
-	                        test = context[breakpoint.prop] > convertToPixels(breakpoint.val.split(':')[0], context, breakpoint.prop) && context[breakpoint.prop] < convertToPixels(breakpoint.val.split(':')[1], context, breakpoint.prop);
-	                        break;
-	                    case '>=<':
-	                    case '>==<':
-	                        test = context[breakpoint.prop] >= convertToPixels(breakpoint.val.split(':')[0], context, breakpoint.prop) && context[breakpoint.prop] <= convertToPixels(breakpoint.val.split(':')[1], context, breakpoint.prop);
-	                        break;
-	                }
-
-	                // test range of breakpoint
-	                if (test) {
-	                    // apply pixel conversions if context target is self
-	                    if (contextName === 'self') {
-	                        DIMENSIONS.forEach(function (prop) {
-	                            if (breakpoint.then.hasOwnProperty(prop)) {
-	                                breakpoint.then[prop] = convertToPixels(breakpoint.then[prop], context, breakpoint.prop);
-	                            }
-	                        });
-	                    }
-
-	                    // apply breakpoint to layout context
-	                    _Object$assign(definition, breakpoint.then);
-	                }
-	            });
-	        }
-	    }
-
-	    function parseBreakpoint(breakpoint) {
-	        return breakpoint.when.split(' ').reduce(function (bp, item, i) {
-	            switch (i) {
-	                case 0:
-	                    var parts = item.split('.');
-	                    bp.ctx = parts[0];
-	                    bp.prop = parts[1];
-	                    break;
-	                case 1:
-	                    bp.eq = item;
-	                    break;
-	                case 2:
-	                    bp.val = item;
-	                    break;
-	            }
-	            return bp;
-	        }, {
-	            ctx: 'parent', // client (browser - android, chrome, etc), self]
-	            prop: null,
-	            eq: '===',
-	            val: null,
-	            then: breakpoint.then
-	        });
-	    }
-
 	    function getChildLayoutFromStyle(component) {
 	        if (component.props && component.props.style) {
-	            var style = reduceStyle(component.props.style);
+	            var style = reactUtil.reduceStyle(component.props.style);
 	            var definition = {};
 	            if (style.width) {
 	                definition.width = style.width;
@@ -21261,143 +21153,16 @@
 	        }
 	    }
 
-	    function getSizeModifiers(style, props, context) {
-	        var size = {
-	            height: 0,
-	            width: 0
-	        };
-	        props.forEach(function (prop) {
-	            var sides = {
-	                top: 0,
-	                right: 0,
-	                bottom: 0,
-	                left: 0
-	            };
-	            //var top = 0, right = 0, bottom = 0, left = 0;
-
-	            if (style.hasOwnProperty(prop)) {
-	                var mod = style[prop].split(' ');
-
-	                if (prop === 'border') {
-	                    sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, '*');
-	                } else {
-	                    //padding, margin
-	                    if (mod.length > 2) {
-	                        sides.top = convertToPixels(mod[0], context, 'height');
-	                        sides.bottom = convertToPixels(mod[2], context, 'height');
-	                    } else {
-	                        sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, '*');
-	                    }
-
-	                    if (mod.length > 1) {
-	                        if (mod.length > 3) {
-	                            sides.right = convertToPixels(mod[1], context, 'width');
-	                            sides.left = convertToPixels(mod[3], context, 'width');
-	                        } else {
-	                            sides.right = sides.left = convertToPixels(mod[1], context, 'width');
-	                        }
-	                    }
-	                }
-	            }
-
-	            SIDES.forEach(function (side) {
-	                if (style.hasOwnProperty(prop + side)) {
-	                    sides[side.toLowerCase()] = convertToPixels(style[prop + side].split(' ')[0], context, side === 'Top' || side === 'Bottom' ? 'height' : 'width');
-	                }
-	            });
-
-	            size.height += sides.top + sides.bottom;
-	            size.width += sides.right + sides.left;
-	        });
-	        return size;
-	    }
-
-	    /**
-	     * Ensure layout context has expected properties
-	     */
-	    function guardLayoutContext(layoutContext) {
-	        assert(layoutContext, 'layoutContext');
-	        assert(layoutContext.height, 'layoutContext.height');
-	        assert(layoutContext.width, 'layoutContext.width');
-	    }
-
-	    /**
-	     * Returns truthy object (treat undefined as false)
-	     */
-	    // function hasLayout (component) {
-	    //     return (
-	    //         (component.props !== undefined && component.props !== null ?
-	    //             component.props.layoutHeight : undefined) ||
-	    //         (component.props !== undefined && component.props !== null ?
-	    //             component.props.layoutWidth : undefined) ||
-	    //         (component.constructor !== undefined && component.constructor !== null ?
-	    //             component.constructor.isReactDomLayout : undefined) ||
-	    //         (component.type !== undefined && component.type !== null ?
-	    //             component.type.isReactDomLayout : undefined)
-	    //     );
-	    // }
-
-	    /**
-	     * Returns truthy object (treat undefined as false)
-	     */
-	    function isReactLayout(component) {
-	        return (component.constructor !== void 0 && component.constructor !== null ? component.constructor.isReactDomLayout : void 0) || (component.type !== void 0 && component.type !== null ? component.type.isReactDomLayout : void 0);
-	    }
-
-	    /**
-	     * Layout is a fixed or calculable number (ie. px, em, rem, %)
-	     */
-	    function layoutIsFixed(value, context, dim) {
-	        //return typeof value === 'number' || !isNaN(convertToPixels(value, context));
-	        //return value !== undefined && !isNaN(parseFloat(value))
-	        return value !== void 0 && !isNaN(convertToPixels(value, context, dim));
-	    }
-
-	    /**
-	     * Layout is flex, which evenly distributes any available
-	     * space among all flex siblings.
-	     */
-	    function layoutIsFlex(value) {
-	        //return value === 'flex' || getUnit(value) === '%';
-	        //return value === 'flex';
-
-	        return value !== void 0 && value.split(':')[0] === 'flex';
-	    }
-
-	    function layoutIsOmitted(value) {
-	        return value === void 0 || value === 'omit';
-	    }
-
-	    // var layoutIsInherited = function (value) {
-	    //     return value === 'inherit' ||
-	    //         !(
-	    //             layoutIsFixed(value) ||
-	    //             layoutIsFlex(value) ||
-	    //             layoutIsOmitted(value)
-	    //         );
-	    // };
-
-	    var needsFlex = function needsFlex(wraps) {
+	    function needsFlex(wraps) {
 	        for (var i = 0; i < wraps.length; i++) {
 	            if (wraps[i].elements.length > 1) {
 	                return true;
 	            }
 	        }
 	        return false;
-	    };
+	    }
 
-	    var unmanaged = function unmanaged(element) {
-	        return element.measure === 0;
-	    };
-
-	    var needsWrap = function needsWrap(wraps) {
-	        if (wraps.length > 1 || wraps[0].elements.filter(unmanaged).length > 0) {
-	            return true;
-	        }
-	        return false;
-	    };
-
-	    var needsScrollbar = function needsScrollbar(layout, parentLayout) {
+	    function needsScrollbar(layout, parentLayout) {
 	        var containedHeight = parentLayout.height;
 
 	        if (!containedHeight) {
@@ -21428,142 +21193,13 @@
 	        }
 
 	        return false;
-	    };
-
-	    function assert(value, name) {
-	        if (value === null) {
-	            throw new Error('missing ' + name);
-	        }
 	    }
 
-	    function isNumber(value) {
-	        return typeof value === 'number';
-	    }
-
-	    function getUnit(str) {
-	        var unit = 'px';
-	        if (str.length > 1) {
-	            if (str.slice(str.length - 2) === 'px') {
-	                unit = 'px';
-	            } else if (str.slice(str.length - 3) === 'rem') {
-	                unit = 'rem';
-	            } else if (str.slice(str.length - 2) === 'em') {
-	                unit = 'em';
-	            } else if (str.slice(str.length - 2) === 'vh') {
-	                unit = 'vh';
-	            } else if (str.slice(str.length - 2) === 'vw') {
-	                unit = 'vw';
-	            } else if (str.slice(str.length - 2) === '%h') {
-	                unit = '%h';
-	            } else if (str.slice(str.length - 2) === '%w') {
-	                unit = '%w';
-	            } else if (str.slice(str.length - 1) === '%') {
-	                unit = '%';
-	            }
+	    function needsWrap(wraps) {
+	        if (wraps.length > 1 || wraps[0].elements.filter(filterUnmanaged).length > 0) {
+	            return true;
 	        }
-	        return unit;
-	    }
-
-	    function getFontSizeBase() {
-	        if (fontSizeBase) {
-	            return fontSizeBase;
-	        } else {
-	            try {
-	                var element = document.body;
-	                var measure = document.createElement('div');
-	                measure.style.height = '1em';
-	                element.appendChild(measure);
-	                var size = measure.offsetHeight / 1;
-	                element.removeChild(measure);
-	                fontSizeBase = size;
-	            } catch (e) {
-	                fontSizeBase = 16;
-	            }
-	        }
-	        return fontSizeBase;
-	    }
-
-	    function getLayoutOptions(component, context) {
-	        var defaults = {
-	            allowScrollbar: true,
-	            allowFlex: true,
-	            allowFlexWrap: true
-	        };
-
-	        if (component.props && component.props.layoutOptions) {
-	            _Object$assign(defaults, component.props.layoutOptions);
-	        }
-
-	        if (context !== void 0 && component.props && component.props.layoutBreakpoints) {
-	            var breakpoint = {};
-	            applyBreakpoints(component, breakpoint, context, 'self');
-
-	            if (breakpoint.options) {
-	                _Object$assign(defaults, breakpoint.options);
-	            }
-	        }
-
-	        return defaults;
-	    }
-
-	    function convertToPixels(str, context, dim) {
-	        if (isNumber(str)) {
-	            return str;
-	        }
-
-	        var unit = getUnit(str);
-	        if (unit === 'rem') {
-	            return parseFloat(str) * getFontSizeBase();
-	        } else if (unit === 'em') {
-	            if (!context || !context.fontSize) {
-	                console.warn('em used root font size (body), because it was not supplied the scoped font size.');
-	            }
-	            return parseFloat(str) * (context ? context.fontSize || getFontSizeBase() : getFontSizeBase());
-	        } else if (unit === 'vh') {
-	            return getRootLayoutContext().height * (parseFloat(str) / 100);
-	        } else if (unit === 'vw') {
-	            return getRootLayoutContext().width * (parseFloat(str) / 100);
-	        } else if (unit === '%' || unit === '%h' || unit === '%w') {
-	            if (context === void 0 || context === null) {
-	                return NaN;
-	            } else {
-	                var compareDim = dim;
-	                if (unit === '%h') {
-	                    compareDim = 'height';
-	                } else if (unit === '%w') {
-	                    compareDim = 'width';
-	                }
-	                if (!compareDim) {
-	                    return NaN;
-	                }
-	                return context[compareDim] * (parseFloat(str) / 100);
-	            }
-	        } else {
-	            return parseFloat(str);
-	        }
-	    }
-
-	    function reduceStyle(style) {
-	        if (Array.isArray(style)) {
-	            var reduce = {};
-	            style.forEach(function (s) {
-	                _Object$assign(reduce, reduceStyle(s));
-	            });
-	            return reduce;
-	        } else {
-	            return style;
-	        }
-	    }
-
-	    function getFlex() {
-	        var flex;
-	        for (var i = 0; i < FLEX.length; i++) {
-	            if (CSS.supports('display', FLEX[i])) {
-	                flex = FLEX[i];
-	                break;
-	            }
-	        }
-	        return flex;
+	        return false;
 	    }
 
 	    return LayoutMixin;
@@ -21802,11 +21438,430 @@
 
 /***/ },
 /* 174 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _Object$assign = __webpack_require__(159)['default'];
+
+	(function (factory) {
+	    module.exports = exports = factory(__webpack_require__(1));
+	})(function (React) {
+
+	    /**
+	     * Safely iterate any known react children structure
+	     */
+	    function reactForEach(children, func) {
+	        if (Array.isArray(children)) {
+	            children.forEach(func);
+	        } else if (React.isValidElement(children)) {
+	            func(children);
+	        } else {
+	            React.Children.forEach(children, func);
+	        }
+	    }
+
+	    /**
+	     * Safely map any known react children structure
+	     */
+	    function reactMap(children, func) {
+	        if (Array.isArray(children)) {
+	            return children.map(func);
+	        } else if (React.isValidElement(children)) {
+	            return func(children);
+	        } else {
+	            return React.Children.map(children, func);
+	        }
+	    }
+
+	    /**
+	     * Reduce an array of objects into one style object
+	     * (React cannot yet natively handle style arrays)
+	     */
+	    function reduceStyle(style) {
+	        if (Array.isArray(style)) {
+	            var reduce = {};
+	            style.forEach(function (s) {
+	                _Object$assign(reduce, reduceStyle(s));
+	            });
+	            return reduce;
+	        } else {
+	            return style;
+	        }
+	    }
+
+	    return {
+	        reactForEach: reactForEach,
+	        reactMap: reactMap,
+	        reduceStyle: reduceStyle
+	    };
+	});
+
+/***/ },
+/* 175 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _Object$assign = __webpack_require__(159)['default'];
+
+	(function (factory) {
+	    module.exports = exports = factory(__webpack_require__(176));
+	})(function (CSS) {
+
+	    // Local variables
+	    var fontSizeBase, getRootLayoutContext;
+	    var DIMENSIONS = ['height', 'width'];
+	    var INNER_MODIFIERS = ['border', 'padding'];
+	    var OUTER_MODIFIERS = ['margin'];
+	    var SIDES = ['Top', 'Right', 'Bottom', 'Left'];
+	    var SCROLLBAR_WIDTH = 22;
+	    var FLEX = ['flex', '-webkit-flex;', '-ms-flexbox', '-moz-box', '-webkit-box'];
+
+	    /**
+	     * Convert various measurement strings to a pixel number
+	     */
+	    function convertToPixels(str, context, dim) {
+	        if (isNumber(str)) {
+	            return str;
+	        }
+
+	        var unit = getUnit(str);
+	        if (unit === 'rem') {
+	            return parseFloat(str) * getFontSizeBase();
+	        } else if (unit === 'em') {
+	            if (!context || !context.fontSize) {
+	                console.warn('em used root font size (body), because it was not supplied the scoped font size.');
+	            }
+	            return parseFloat(str) * (context ? context.fontSize || getFontSizeBase() : getFontSizeBase());
+	        } else if (unit === 'vh') {
+	            return getRootLayoutContext().height * (parseFloat(str) / 100);
+	        } else if (unit === 'vw') {
+	            return getRootLayoutContext().width * (parseFloat(str) / 100);
+	        } else if (unit === '%' || unit === '%h' || unit === '%w') {
+	            if (context === void 0 || context === null) {
+	                return NaN;
+	            } else {
+	                var compareDim = dim;
+	                if (unit === '%h') {
+	                    compareDim = 'height';
+	                } else if (unit === '%w') {
+	                    compareDim = 'width';
+	                }
+	                if (!compareDim) {
+	                    return NaN;
+	                }
+	                return context[compareDim] * (parseFloat(str) / 100);
+	            }
+	        } else {
+	            return parseFloat(str);
+	        }
+	    }
+
+	    /**
+	     * Return single object of layout properties from
+	     * all matching breakpoints for a given component.
+	     * Properties that require processing of measurement units
+	     * use the given context object to resolve relative measurements.
+	     * This object is expected to have a property named either 'parent' or 'self'
+	     * in order to define the relation that the context has to the component.
+	     */
+	    function getBreakpointLayout(component, context) {
+
+	        var layoutProps = {};
+
+	        // apply breakpoint layout
+	        if (component.props && component.props.layoutBreakpoints && component.props.layoutBreakpoints.length && context !== void 0 && context !== null) {
+
+	            // Find the context relationship
+	            var contextRelation = '';
+	            for (var prop in context) {
+	                if (context.hasOwnProperty(prop)) {
+	                    contextRelation = prop;
+	                    break;
+	                }
+	            }
+
+	            // Iterate through a filtered array of breakpoints that reference the passed in context relation: parent or self
+	            component.props.layoutBreakpoints.map(parseBreakpointCondition).filter(function (bp) {
+	                return bp.ctx === contextRelation;
+	            }).forEach(function (breakpoint) {
+
+	                // Test the condition
+	                var test = false;
+	                switch (breakpoint.eq) {
+	                    case '=':
+	                    case '==':
+	                    case '===':
+	                        test = context[contextRelation][breakpoint.prop] === convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
+	                        break;
+	                    case '<':
+	                        test = context[contextRelation][breakpoint.prop] < convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
+	                        break;
+	                    case '>':
+	                        test = context[contextRelation][breakpoint.prop] > convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
+	                        break;
+	                    case '<=':
+	                        test = context[contextRelation][breakpoint.prop] <= convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
+	                        break;
+	                    case '>=':
+	                        test = context[contextRelation][breakpoint.prop] >= convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
+	                        break;
+	                    case '><':
+	                        test = context[contextRelation][breakpoint.prop] > convertToPixels(breakpoint.val.split(':')[0], context[contextRelation], breakpoint.prop) && context[contextRelation][breakpoint.prop] < convertToPixels(breakpoint.val.split(':')[1], context[contextRelation], breakpoint.prop);
+	                        break;
+	                    case '>=<':
+	                    case '>==<':
+	                        test = context[contextRelation][breakpoint.prop] >= convertToPixels(breakpoint.val.split(':')[0], context[contextRelation], breakpoint.prop) && context[contextRelation][breakpoint.prop] <= convertToPixels(breakpoint.val.split(':')[1], context[contextRelation], breakpoint.prop);
+	                        break;
+	                }
+
+	                // test range of breakpoint
+	                if (test) {
+	                    // apply pixel conversions if context target is self
+	                    if (contextRelation === 'self') {
+	                        DIMENSIONS.forEach(function (dimension) {
+	                            if (breakpoint.then.hasOwnProperty(dimension)) {
+	                                breakpoint.then[dimension] = convertToPixels(breakpoint.then[dimension], context, breakpoint.prop);
+	                            }
+	                        });
+	                    }
+
+	                    // apply breakpoint to layout context
+	                    _Object$assign(layoutProps, breakpoint.then);
+	                }
+	            });
+	        }
+	        return layoutProps;
+	    }
+
+	    function getFontSizeBase() {
+	        if (fontSizeBase) {
+	            return fontSizeBase;
+	        } else {
+	            try {
+	                var element = document.body;
+	                var measure = document.createElement('div');
+	                measure.style.height = '1em';
+	                element.appendChild(measure);
+	                var size = measure.offsetHeight / 1;
+	                element.removeChild(measure);
+	                fontSizeBase = size;
+	            } catch (e) {
+	                fontSizeBase = 16;
+	            }
+	        }
+	        return fontSizeBase;
+	    }
+
+	    /**
+	     * Return an options object for a layout component
+	     */
+	    function getLayoutOptions(component, context) {
+	        // Default option values
+	        var defaults = {
+	            allowScrollbar: true,
+	            allowFlex: true,
+	            allowFlexWrap: true
+	        };
+
+	        // Overwrite options with layoutOptions property (if exists)
+	        if (component.props && component.props.layoutOptions) {
+	            _Object$assign(defaults, component.props.layoutOptions);
+	        }
+
+	        // Overwrite options with applied breakpoints that contains an options
+	        if (context !== void 0 && component.props && component.props.layoutBreakpoints) {
+	            var breakpointLayout = getBreakpointLayout(component, { self: context });
+
+	            if (breakpointLayout.options) {
+	                _Object$assign(defaults, breakpointLayout.options);
+	            }
+	        }
+
+	        return defaults;
+	    }
+
+	    function getSizeModifiers(style, props, context) {
+	        var size = {
+	            height: 0,
+	            width: 0
+	        };
+	        props.forEach(function (prop) {
+	            var sides = {
+	                top: 0,
+	                right: 0,
+	                bottom: 0,
+	                left: 0
+	            };
+
+	            if (style.hasOwnProperty(prop)) {
+	                var mod = style[prop].split(' ');
+
+	                if (prop === 'border') {
+	                    sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, '*');
+	                } else {
+	                    // padding, margin
+	                    if (mod.length > 2) {
+	                        sides.top = convertToPixels(mod[0], context, 'height');
+	                        sides.bottom = convertToPixels(mod[2], context, 'height');
+	                    } else {
+	                        sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, '*');
+	                    }
+
+	                    if (mod.length > 1) {
+	                        if (mod.length > 3) {
+	                            sides.right = convertToPixels(mod[1], context, 'width');
+	                            sides.left = convertToPixels(mod[3], context, 'width');
+	                        } else {
+	                            sides.right = sides.left = convertToPixels(mod[1], context, 'width');
+	                        }
+	                    }
+	                }
+	            }
+
+	            SIDES.forEach(function (side) {
+	                if (style.hasOwnProperty(prop + side)) {
+	                    sides[side.toLowerCase()] = convertToPixels(style[prop + side].split(' ')[0], context, side === 'Top' || side === 'Bottom' ? 'height' : 'width');
+	                }
+	            });
+
+	            size.height += sides.top + sides.bottom;
+	            size.width += sides.right + sides.left;
+	        });
+	        return size;
+	    }
+
+	    function isNumber(value) {
+	        return typeof value === 'number';
+	    }
+
+	    /**
+	     * Returns truthy object (treat undefined as false)
+	     */
+	    function isLayout(component) {
+	        var result = false;
+	        try {
+	            result = (component.constructor !== void 0 && component.constructor !== null ? component.constructor.isReactDomLayout : void 0) || (component.type !== void 0 && component.type !== null ? component.type.isReactDomLayout : void 0);
+
+	            result = result || false;
+	        } catch (e) {
+	            console.error(e);
+	        }
+	        return result;
+	    }
+
+	    /**
+	     * Layout is a fixed or calculable number (ie. px, em, rem, %)
+	     */
+	    function layoutIsFixed(value, context, dim) {
+	        return value !== void 0 && !isNaN(convertToPixels(value, context, dim));
+	    }
+
+	    /**
+	     * Layout is flex, which evenly distributes any available
+	     * space among all flex siblings.
+	     */
+	    function layoutIsFlex(value) {
+	        return value !== void 0 && value.split(':')[0] === 'flex';
+	    }
+
+	    function layoutIsOmitted(value) {
+	        return value === void 0 || value === 'omit';
+	    }
+
+	    /*************************************************************
+	     * INTERNAL METHODS
+	     *************************************************************/
+	    function getFlex() {
+	        var flex;
+	        for (var i = 0; i < FLEX.length; i++) {
+	            if (CSS.supports('display', FLEX[i])) {
+	                flex = FLEX[i];
+	                break;
+	            }
+	        }
+	        return flex;
+	    }
+
+	    function getUnit(str) {
+	        var unit = 'px';
+	        if (str.length > 1) {
+	            if (str.slice(str.length - 2) === 'px') {
+	                unit = 'px';
+	            } else if (str.slice(str.length - 3) === 'rem') {
+	                unit = 'rem';
+	            } else if (str.slice(str.length - 2) === 'em') {
+	                unit = 'em';
+	            } else if (str.slice(str.length - 2) === 'vh') {
+	                unit = 'vh';
+	            } else if (str.slice(str.length - 2) === 'vw') {
+	                unit = 'vw';
+	            } else if (str.slice(str.length - 2) === '%h') {
+	                unit = '%h';
+	            } else if (str.slice(str.length - 2) === '%w') {
+	                unit = '%w';
+	            } else if (str.slice(str.length - 1) === '%') {
+	                unit = '%';
+	            }
+	        }
+	        return unit;
+	    }
+
+	    /**
+	     * Parse a 'when' string argument into a breakpoint condition
+	     */
+	    function parseBreakpointCondition(breakpoint) {
+	        return breakpoint.when.split(' ').reduce(function (bp, item, i) {
+	            switch (i) {
+	                case 0:
+	                    var parts = item.split('.');
+	                    bp.ctx = parts[0];
+	                    bp.prop = parts[1];
+	                    break;
+	                case 1:
+	                    bp.eq = item;
+	                    break;
+	                case 2:
+	                    bp.val = item;
+	                    break;
+	            }
+	            return bp;
+	        }, {
+	            ctx: 'parent', // client (browser - android, chrome, etc), self]
+	            prop: null,
+	            eq: '===',
+	            val: null,
+	            then: breakpoint.then
+	        });
+	    }
+
+	    return {
+	        DIMENSIONS: DIMENSIONS,
+	        INNER_MODIFIERS: INNER_MODIFIERS,
+	        OUTER_MODIFIERS: OUTER_MODIFIERS,
+	        SCROLLBAR_WIDTH: SCROLLBAR_WIDTH,
+	        convertToPixels: convertToPixels,
+	        getBreakpointLayout: getBreakpointLayout,
+	        getFlex: getFlex,
+	        getFontSizeBase: getFontSizeBase,
+	        getLayoutOptions: getLayoutOptions,
+	        getSizeModifiers: getSizeModifiers,
+	        isNumber: isNumber,
+	        isLayout: isLayout,
+	        layoutIsFixed: layoutIsFixed,
+	        layoutIsFlex: layoutIsFlex,
+	        layoutIsOmitted: layoutIsOmitted
+	    };
+	});
+
+/***/ },
+/* 176 */
 /***/ function(module, exports) {
 
-	/*! CSS.supports() Polyfill
-	* https://gist.github.com/codler/03a0995195aa2859465f
-	* Copyright (c) 2014 Han Lin Yap http://yap.nu; MIT license */
+	/**
+	 *  CSS.supports() Polyfill - Adapted from https://gist.github.com/codler/03a0995195aa2859465f
+	 */
 
 	'use strict';
 
@@ -21819,52 +21874,20 @@
 	        window.CSS._cacheSupports = {};
 	        window.CSS.supports = function (propertyName, value) {
 	            var key = [propertyName, value].toString();
+
+	            // Return cached value if exists
 	            if (key in window.CSS._cacheSupports) {
 	                return window.CSS._cacheSupports[key];
 	            }
 
-	            function cssSupports(propertyName, value) {
-	                var style = document.createElement('div').style;
+	            // Check if propertyName/value combo is supported
+	            var supported = cssSupports(propertyName, value);
 
-	                // 1 argument
-	                if (value === void 0) {
-	                    var mergeOdd = function mergeOdd(propertyName, reg) {
-	                        var arr = propertyName.split(reg);
+	            // Assign to cache
+	            window.CSS._cacheSupports[key] = supported;
 
-	                        if (arr.length > 1) {
-	                            return arr.map(function (value, index, arr) {
-	                                return index % 2 === 0 ? value + arr[index + 1] : '';
-	                            }).filter(Boolean);
-	                        }
-	                    }
-
-	                    // The regex will do this '( a:b ) or ( c:d )' => ["( a:b ", ")", "(", " c:d )"]
-	                    ;
-
-	                    var arrOr = mergeOdd(propertyName, /([)])\s*or\s*([(])/gi);
-	                    if (arrOr) {
-	                        return arrOr.some(function (supportsCondition) {
-	                            return window.CSS.supports(supportsCondition);
-	                        });
-	                    }
-	                    var arrAnd = mergeOdd(propertyName, /([)])\s*and\s*([(])/gi);
-	                    if (arrAnd) {
-	                        return arrAnd.every(function (supportsCondition) {
-	                            return window.CSS.supports(supportsCondition);
-	                        });
-	                    }
-
-	                    // Remove the first and last parentheses
-	                    style.cssText = propertyName.replace('(', '').replace(/[)]$/, '');
-	                    // 2 arguments
-	                } else {
-	                        style.cssText = propertyName + ':' + value;
-	                    }
-
-	                return !!style.length;
-	            }
-
-	            return window.CSS._cacheSupports[key] = cssSupports(propertyName, value);
+	            // Return value
+	            return supported;
 	        };
 	    }
 
@@ -21877,8 +21900,47 @@
 	    };
 	}
 
+	function cssSupports(propertyName, value) {
+	    var style = document.createElement('div').style;
+
+	    // 1 argument
+	    if (value === void 0) {
+	        // The regex will do this '( a:b ) or ( c:d )' => ["( a:b ", ")", "(", " c:d )"]
+	        var arrOr = mergeOdd(propertyName, /([)])\s*or\s*([(])/gi);
+	        if (arrOr) {
+	            return arrOr.some(function (supportsCondition) {
+	                return window.CSS.supports(supportsCondition);
+	            });
+	        }
+	        var arrAnd = mergeOdd(propertyName, /([)])\s*and\s*([(])/gi);
+	        if (arrAnd) {
+	            return arrAnd.every(function (supportsCondition) {
+	                return window.CSS.supports(supportsCondition);
+	            });
+	        }
+
+	        // Remove the first and last parentheses
+	        style.cssText = propertyName.replace('(', '').replace(/[)]$/, '');
+	        // 2 arguments
+	    } else {
+	            style.cssText = propertyName + ':' + value;
+	        }
+
+	    return !!style.length;
+	}
+
+	function mergeOdd(propertyName, reg) {
+	    var arr = propertyName.split(reg);
+
+	    if (arr.length > 1) {
+	        return arr.map(function (value, index, arr2) {
+	            return index % 2 === 0 ? value + arr2[index + 1] : '';
+	        }).filter(Boolean);
+	    }
+	}
+
 /***/ },
-/* 175 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21936,14 +21998,14 @@
 	});
 
 /***/ },
-/* 176 */
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	(function (factory) {
 	    'use strict';
-	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(177), __webpack_require__(180), __webpack_require__(158));
+	    module.exports = exports = factory(__webpack_require__(1), __webpack_require__(179), __webpack_require__(182), __webpack_require__(158));
 	})(function (React, EventHandler, windowSizeStore, LayoutMixin) {
 	    'use strict';
 	    var WindowSizeLayout = React.createClass({
@@ -21978,12 +22040,14 @@
 	        componentWillMount: function componentWillMount() {
 	            // clear margin on body
 	            try {
-	                var margin = window.getComputedStyle(document.body).getPropertyValue("margin");
+	                var margin = window.getComputedStyle(document.body).getPropertyValue('margin');
 	                if (margin) {
-	                    document.body.style.margin = "0px";
-	                    document.body.style.fontSize = "100%";
+	                    document.body.style.margin = '0px';
+	                    document.body.style.fontSize = '100%';
 	                }
-	            } catch (e) {}
+	            } catch (e) {
+	                console.error(e);
+	            }
 
 	            /**
 	            * Create a filtered event handler
@@ -21994,7 +22058,7 @@
 	            };
 
 	            this.handlers.windowSizeChange.debounce(100)
-	            //.distinctUntilChanged() // sometimes we want to force a refresh due to scrollbars appearing or disappearing
+	            // .distinctUntilChanged() // sometimes we want to force a refresh due to scrollbars appearing or disappearing
 	            .subscribe(this.handleStoreUpdate);
 
 	            // Subscribe to stores
@@ -22036,17 +22100,15 @@
 	         * RENDERING HELPERS
 	         *************************************************************/
 	        getRootLayoutContext: function getRootLayoutContext() {
-	            // funky things happen when we rely on getClientSize for height
+	            /**
+	             * Funky results sometimes occur when we rely on getClientSize for height,
+	             * so we will only get window size until we have time to figure out when and
+	             * why it becomes unreliable.
+	             */
 	            return {
 	                height: windowSizeStore.getWindowSize().height,
 	                width: windowSizeStore.getClientSize().width < windowSizeStore.getWindowSize().width && Math.abs(windowSizeStore.getClientSize().width - windowSizeStore.getWindowSize().width) < 100 ? windowSizeStore.getClientSize().width : windowSizeStore.getWindowSize().width
 	            };
-	            // return {
-	            //     height: windowSizeStore.getClientSize().height < windowSizeStore.getWindowSize().height && Math.abs(windowSizeStore.getClientSize().height - windowSizeStore.getWindowSize().height) < 100 ?
-	            //         windowSizeStore.getClientSize().height : windowSizeStore.getWindowSize().height,
-	            //     width: windowSizeStore.getClientSize().width < windowSizeStore.getWindowSize().width && Math.abs(windowSizeStore.getClientSize().width - windowSizeStore.getWindowSize().width) < 100 ?
-	            //         windowSizeStore.getClientSize().width : windowSizeStore.getWindowSize().width
-	            // };
 	        },
 
 	        /*************************************************************
@@ -22061,13 +22123,13 @@
 	});
 
 /***/ },
-/* 177 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(178));
+	    module.exports = exports = factory(__webpack_require__(180));
 	})(function (Rx) {
 	    return {
 	        create: function create() {
@@ -22075,9 +22137,11 @@
 	                subject.onNext(value);
 	            }
 
+	            /* eslint-disable guard-for-in */
 	            for (var key in Rx.Subject.prototype) {
 	                subject[key] = Rx.Subject.prototype[key];
 	            }
+	            /* eslint-enable guard-for-in */
 
 	            Rx.Subject.call(subject);
 
@@ -22087,7 +22151,7 @@
 	});
 
 /***/ },
-/* 178 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global, process) {// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
@@ -28457,10 +28521,10 @@
 
 	}.call(this));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(179)(module), (function() { return this; }()), __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(181)(module), (function() { return this; }()), __webpack_require__(3)))
 
 /***/ },
-/* 179 */
+/* 181 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -28476,15 +28540,15 @@
 
 
 /***/ },
-/* 180 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _Object$create = __webpack_require__(181)['default'];
+	var _Object$create = __webpack_require__(183)['default'];
 
 	(function (factory) {
-	    module.exports = exports = factory(__webpack_require__(183));
+	    module.exports = exports = factory(__webpack_require__(185));
 	})(function (store) {
 	    var WindowSizeStore = function WindowSizeStore() {
 	        store.Store.call(this);
@@ -28529,13 +28593,13 @@
 	});
 
 /***/ },
-/* 181 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(182), __esModule: true };
+	module.exports = { "default": __webpack_require__(184), __esModule: true };
 
 /***/ },
-/* 182 */
+/* 184 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(168);
@@ -28544,7 +28608,7 @@
 	};
 
 /***/ },
-/* 183 */
+/* 185 */
 /***/ function(module, exports) {
 
 	'use strict';

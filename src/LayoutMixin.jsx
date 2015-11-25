@@ -46,9 +46,9 @@
                 }
                 else {
                     layoutContext = {
-                        width: isNumber(this.props.layoutWidth) ? this.props.layoutWidth : undefined,
-                        height: isNumber(this.props.layoutHeight) ? this.props.layoutHeight : undefined,
-                        fontSize: isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : undefined,
+                        width: core.isNumber(this.props.layoutWidth) ? this.props.layoutWidth : undefined,
+                        height: core.isNumber(this.props.layoutHeight) ? this.props.layoutHeight : undefined,
+                        fontSize: core.isNumber(this.props.layoutFontSize) ? this.props.layoutFontSize : undefined,
                         visible: this.props.layoutVisible || true
                     };
                 }
@@ -171,14 +171,10 @@
                         layout.styles.push(childLayout.style || {});
                     }
                     else {
-                        //return;
+                        // add an empty style
                         layout.styles.push({});
-                        //debugger;
                     }
                 }
-                // else {
-                //     return;
-                // }
 
                 core.DIMENSIONS.forEach(function (dim) {
                     // get currect wrap
@@ -460,9 +456,12 @@
          *************************************************************/
         renderLayout: function (component) {
             var ref = this.props;
+            /* eslint-disable no-param-reassign */
             if (component === undefined || component === null) {
                 component = ref.component;
             }
+            /* eslint-enable no-param-reassign */
+
             var style = Object.assign({}, ref.style);
             var extraProps = {};
             var children;
@@ -482,7 +481,6 @@
                 extraProps.style = Object.assign({}, (this.props.style || {}), localStyle);
             }
 
-            //extraProps.children = this.props.children;
             return component(Object.assign({}, this.props, extraProps), children);
         },
     };
@@ -490,20 +488,23 @@
     /*************************************************************
      * INTERNAL METHODS
      *************************************************************/
-    /** 
+    /**
      * Filter unmanaged layout elements
      */
-    function filterUnmanaged(element) {
+    function filterUnmanaged (element) {
         return element.measure === 0;
-    };
+    }
 
     function getWrap (index, wraps) {
         var wrap;
         var wrapsIndex = 0;
         while (!wrap && wrapsIndex < wraps.length) {
             if (wraps[wrapsIndex].elements.length < index + 1) {
-                // move on to the next wrap
+                /* eslint-disable no-param-reassign */
                 index -= wraps[wrapsIndex].elements.length;
+                /* eslint-enable no-param-reassign */
+
+                // move on to the next wrap
                 wrapsIndex++;
             }
             else {
@@ -611,16 +612,16 @@
         }
     }
 
-    function needsFlex(wraps) {
+    function needsFlex (wraps) {
         for (var i = 0; i < wraps.length; i++) {
             if (wraps[i].elements.length > 1) {
                 return true;
             }
         }
         return false;
-    };
+    }
 
-    function needsScrollbar(layout, parentLayout) {
+    function needsScrollbar (layout, parentLayout) {
         var containedHeight = parentLayout.height;
 
         if (!containedHeight) {
@@ -651,14 +652,14 @@
         }
 
         return false;
-    };
+    }
 
-    function needsWrap(wraps) {
+    function needsWrap (wraps) {
         if (wraps.length > 1 || (wraps[0].elements.filter(filterUnmanaged).length > 0)) {
             return true;
         }
         return false;
-    };
+    }
 
     return LayoutMixin;
 }));

@@ -14,9 +14,9 @@
     var FLEX = ['flex', '-webkit-flex;', '-ms-flexbox', '-moz-box', '-webkit-box'];
 
     /**
-     * Convert various measurements to 
+     * Convert various measurement strings to a pixel number
      */
-    function convertToPixels(str, context, dim) {
+    function convertToPixels (str, context, dim) {
         if (isNumber(str)) {
             return str;
         }
@@ -61,15 +61,15 @@
     }
 
     /**
-     * Return single object of layout properties from 
+     * Return single object of layout properties from
      * all matching breakpoints for a given component.
      * Properties that require processing of measurement units
      * use the given context object to resolve relative measurements.
      * This object is expected to have a property named either 'parent' or 'self'
      * in order to define the relation that the context has to the component.
      */
-    function getBreakpointLayout(component, context) {
-        
+    function getBreakpointLayout (component, context) {
+
         var layoutProps = {};
 
         // apply breakpoint layout
@@ -77,7 +77,7 @@
 
             // Find the context relationship
             var contextRelation = '';
-            for (var prop in context) {  
+            for (var prop in context) {
                 if (context.hasOwnProperty(prop)) {
                     contextRelation = prop;
                     break;
@@ -93,36 +93,36 @@
                     case '=':
                     case '==':
                     case '===':
-                        test = context[contextRelation][breakpoint.prop] === convertToPixels(breakpoint.val, context[contextName], breakpoint.prop);
+                        test = context[contextRelation][breakpoint.prop] === convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
                         break;
                     case '<':
-                        test = context[contextName][breakpoint.prop] < convertToPixels(breakpoint.val, context[contextName], breakpoint.prop);
+                        test = context[contextRelation][breakpoint.prop] < convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
                         break;
                     case '>':
-                        test = context[contextName][breakpoint.prop] > convertToPixels(breakpoint.val, context[contextName], breakpoint.prop);
+                        test = context[contextRelation][breakpoint.prop] > convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
                         break;
                     case '<=':
-                        test = context[contextName][breakpoint.prop] <= convertToPixels(breakpoint.val, context[contextName], breakpoint.prop);
+                        test = context[contextRelation][breakpoint.prop] <= convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
                         break;
                     case '>=':
-                        test = context[contextName][breakpoint.prop] >= convertToPixels(breakpoint.val, context[contextName], breakpoint.prop);
+                        test = context[contextRelation][breakpoint.prop] >= convertToPixels(breakpoint.val, context[contextRelation], breakpoint.prop);
                         break;
                     case '><':
-                        test = context[contextName][breakpoint.prop] > convertToPixels(breakpoint.val.split(':')[0], context[contextName], breakpoint.prop) && context[contextName][breakpoint.prop] < convertToPixels(breakpoint.val.split(':')[1], context[contextName], breakpoint.prop);
+                        test = context[contextRelation][breakpoint.prop] > convertToPixels(breakpoint.val.split(':')[0], context[contextRelation], breakpoint.prop) && context[contextRelation][breakpoint.prop] < convertToPixels(breakpoint.val.split(':')[1], context[contextRelation], breakpoint.prop);
                         break;
                     case '>=<':
                     case '>==<':
-                        test = context[contextName][breakpoint.prop] >= convertToPixels(breakpoint.val.split(':')[0], context[contextName], breakpoint.prop) && context[contextName][breakpoint.prop] <= convertToPixels(breakpoint.val.split(':')[1], context[contextName], breakpoint.prop);
+                        test = context[contextRelation][breakpoint.prop] >= convertToPixels(breakpoint.val.split(':')[0], context[contextRelation], breakpoint.prop) && context[contextRelation][breakpoint.prop] <= convertToPixels(breakpoint.val.split(':')[1], context[contextRelation], breakpoint.prop);
                         break;
                 }
 
                 // test range of breakpoint
                 if (test) {
                     // apply pixel conversions if context target is self
-                    if (contextName === 'self') {
-                        DIMENSIONS.forEach(function (prop) {
-                            if (breakpoint.then.hasOwnProperty(prop)) {
-                                breakpoint.then[prop] = convertToPixels(breakpoint.then[prop], context, breakpoint.prop);
+                    if (contextRelation === 'self') {
+                        DIMENSIONS.forEach(function (dimension) {
+                            if (breakpoint.then.hasOwnProperty(dimension)) {
+                                breakpoint.then[dimension] = convertToPixels(breakpoint.then[dimension], context, breakpoint.prop);
                             }
                         });
                     }
@@ -135,7 +135,7 @@
         return layoutProps;
     }
 
-    function getFontSizeBase() {
+    function getFontSizeBase () {
         if (fontSizeBase) {
             return fontSizeBase;
         }
@@ -159,7 +159,7 @@
     /**
      * Return an options object for a layout component
      */
-    function getLayoutOptions(component, context) {
+    function getLayoutOptions (component, context) {
         // Default option values
         var defaults = {
             allowScrollbar: true,
@@ -184,7 +184,7 @@
         return defaults;
     }
 
-    function getSizeModifiers(style, props, context) {
+    function getSizeModifiers (style, props, context) {
         var size = {
             height: 0,
             width: 0
@@ -196,7 +196,6 @@
                 bottom: 0,
                 left: 0
             };
-            //var top = 0, right = 0, bottom = 0, left = 0;
 
             if (style.hasOwnProperty(prop)) {
                 var mod = style[prop].split(' ');
@@ -204,7 +203,7 @@
                 if (prop === 'border') {
                     sides.top = sides.right = sides.bottom = sides.left = convertToPixels(mod[0], context, '*');
                 }
-                else { //padding, margin
+                else { // padding, margin
                     if (mod.length > 2) {
                         sides.top = convertToPixels(mod[0], context, 'height');
                         sides.bottom = convertToPixels(mod[2], context, 'height');
@@ -240,27 +239,33 @@
         return size;
     }
 
+    function isNumber (value) {
+        return typeof value === 'number';
+    }
+
     /**
      * Returns truthy object (treat undefined as false)
      */
-    function isLayout(component) {
+    function isLayout (component) {
         var result = false;
         try {
             result = (component.constructor !== undefined && component.constructor !== null ?
                 component.constructor.isReactDomLayout : undefined) ||
-            (component.type !== undefined && component.type !== null ?
-                component.type.isReactDomLayout : undefined)
+                (component.type !== undefined && component.type !== null ?
+                component.type.isReactDomLayout : undefined);
 
             result = result || false;
         }
-        catch (e) { }
+        catch (e) {
+            console.error(e);
+        }
         return result;
     }
 
     /**
      * Layout is a fixed or calculable number (ie. px, em, rem, %)
      */
-    function layoutIsFixed(value, context, dim) {
+    function layoutIsFixed (value, context, dim) {
         return value !== undefined && !isNaN(convertToPixels(value, context, dim));
     }
 
@@ -268,18 +273,18 @@
      * Layout is flex, which evenly distributes any available
      * space among all flex siblings.
      */
-    function layoutIsFlex(value) {
+    function layoutIsFlex (value) {
         return value !== undefined && value.split(':')[0] === 'flex';
     }
 
-    function layoutIsOmitted(value) {
+    function layoutIsOmitted (value) {
         return value === undefined || value === 'omit';
     }
 
     /*************************************************************
      * INTERNAL METHODS
      *************************************************************/
-    function getFlex() {
+    function getFlex () {
         var flex;
         for (var i = 0; i < FLEX.length; i++) {
             if (CSS.supports('display', FLEX[i])) {
@@ -290,7 +295,7 @@
         return flex;
     }
 
-    function getUnit(str) {
+    function getUnit (str) {
         var unit = 'px';
         if (str.length > 1) {
             if (str.slice(str.length - 2) === 'px') {
@@ -321,14 +326,10 @@
         return unit;
     }
 
-    function isNumber(value) {
-        return typeof value === 'number';
-    }
-
     /**
      * Parse a 'when' string argument into a breakpoint condition
      */
-    function parseBreakpointCondition(breakpoint) {
+    function parseBreakpointCondition (breakpoint) {
         return breakpoint.when.split(' ').reduce(function (bp, item, i) {
             switch (i) {
                 case 0:
@@ -365,6 +366,7 @@
         getFontSizeBase: getFontSizeBase,
         getLayoutOptions: getLayoutOptions,
         getSizeModifiers: getSizeModifiers,
+        isNumber: isNumber,
         isLayout: isLayout,
         layoutIsFixed: layoutIsFixed,
         layoutIsFlex: layoutIsFlex,
