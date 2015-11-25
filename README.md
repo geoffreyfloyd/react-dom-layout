@@ -19,7 +19,6 @@ Layout components (any react component that has the LayoutMixin applied) are res
 - layoutVisible
 - layoutBreakpoints
 
-
 The value of layoutHeight and layoutWidth can be set to `flex`, `omit`, or a fixed/relative size, such as:
 
 - "20px"
