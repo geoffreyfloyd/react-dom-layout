@@ -257,6 +257,11 @@
      */
     function isLayout (component) {
         var result = false;
+
+        if (component === undefined || component === null) {
+            return false;
+        }
+
         try {
             result = (component.constructor !== undefined && component.constructor !== null ?
                 component.constructor.isReactDomLayout : undefined) ||

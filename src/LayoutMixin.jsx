@@ -376,8 +376,6 @@
                     }
                 });
 
-
-
                 if (core.isLayout(child)) {
                     // if it is a react layout then
                     // pass a layout context and
@@ -455,14 +453,13 @@
          * RENDERING
          *************************************************************/
         renderLayout: function (component) {
-            var ref = this.props;
             /* eslint-disable no-param-reassign */
             if (component === undefined || component === null) {
-                component = ref.component;
+                component = this.props.component;
             }
             /* eslint-enable no-param-reassign */
 
-            var style = Object.assign({}, ref.style);
+            var style = Object.assign({}, reactUtil.reduceStyle(this.props.style));
             var extraProps = {};
             var children;
 
@@ -474,7 +471,7 @@
                     measure = this.measureLayoutForChildren(this.props.children, { width: core.SCROLLBAR_WIDTH });
                 }
 
-                extraProps.style = Object.assign(reactUtil.reduceStyle(style) || {}, measure.containerStyle, localStyle);
+                extraProps.style = Object.assign(style, measure.containerStyle, localStyle);
                 children = this.applyLayoutToChildren(this.props.children, measure);
             }
             else {

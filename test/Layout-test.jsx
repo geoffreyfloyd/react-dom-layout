@@ -11,6 +11,26 @@
     );
 }(function (React, TestUtils, core, WindowSizeLayout, Layout, SplitLayout) {
 
+    var container = {
+        padding: '0.3125rem'
+    };
+    var innerContainer = {
+        borderRadius: '0.75rem',
+        border: '2px solid #ccc'
+    };
+
+    var TestComponent = React.createClass({
+        render: function () {
+            return (
+                <Layout layoutContext={this.props.layoutContext} style={container}>
+                    <Layout layoutContext={this.props.layoutContext} style={innerContainer}>
+                        <div layoutHeight="inherit">one</div>
+                    </Layout>
+                </Layout>
+            );
+        }
+    });
+
     // Create a Layout component
     var layoutBorders = TestUtils.renderIntoDocument(
         <WindowSizeLayout>
@@ -37,8 +57,20 @@
         </WindowSizeLayout>
     );
 
-    var windowSize = layoutBorders.getRootLayoutContext();
+    var layoutComponent = TestUtils.renderIntoDocument(
+        <WindowSizeLayout>
+            <TestComponent id="firstLayout" style={{margin: '1px'}} />
+        </WindowSizeLayout>
+    );
 
+    describe("Components", function () {
+        it('should retain style props', function () {
+            var layout = TestUtils.scryRenderedComponentsWithType(layoutComponent, Layout)[0];
+            expect(layout.props.style.padding).to.equal('0.3125rem');
+        });
+    });
+
+    var windowSize = layoutBorders.getRootLayoutContext();
     describe("Layout", function () {
 
         // Basic assertions
@@ -46,6 +78,8 @@
         it('should have default prop - component', function () { expect(layoutBorders.props).not.to.be.null && expect(layoutBorders.props.component).not.to.be.null && expect(layoutBorders.props.component).to.equal(React.DOM.div); });
         it('should have default prop - layoutHeight', function () { expect(layoutBorders.props).not.to.be.null && expect(layoutBorders.props.layoutHeight).to.be.null; });
         it('should have default prop - layoutWidth', function () { expect(layoutBorders.props).not.to.be.null && expect(layoutBorders.props.layoutWidth).to.be.null; });
+
+
 
         // Asserting behavior with borders
         TestUtils.findAllInRenderedTree(layoutBorders, function (component) {
