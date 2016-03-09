@@ -1,6 +1,6 @@
 ﻿(function (factory) {
-    var React = require('react/addons'),
-        ReactTestUtils = React.addons.TestUtils,
+    var React = require('react'),
+        ReactTestUtils = require('react-addons-test-utils'),
         core = require('../src/core'),
         testUtils = require('./test-util'),
         WindowSizeLayout = require('../src/WindowSizeLayout'),

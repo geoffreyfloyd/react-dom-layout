@@ -1,6 +1,6 @@
 ﻿(function (factory) {
-    var React = require('react/addons'),
-        ReactTestUtils = React.addons.TestUtils,
+    var React = require('react'),
+        ReactTestUtils = require('react-addons-test-utils'),
         core = require('../src/core'),
         WindowSizeLayout = require('../src/WindowSizeLayout'),
         Layout = require('../src/Layout'),
@@ -83,33 +83,35 @@
 
         // Asserting behavior with borders
         ReactTestUtils.findAllInRenderedTree(layoutBorders, function (component) {
-            if (component.props.id === 'firstLayout') {
-                it('should inherit height and width from parent layout', function () {
-                    expect(component.props.layoutContext.height).to.equal(windowSize.height);
-                    expect(component.props.layoutContext.width).to.equal(windowSize.width);
-                });
-            }
-            else if (component.props.id === 'firstLayoutChild_InheritHeightNonLayout') {
-                it('should not define dimension for non-Layout component unless explicitly inherited', function () {
-                    expect(component.props.style.width).to.equal(undefined);
-                });
-                it('should subtract from available dimension when border style is used', function () {
-                    expect(component.props.style.height).to.equal(windowSize.height - 2);
-                });
-            }
-            else if (component.props.id === 'firstLayoutChild_InheritWidthNonLayout') {
-                it('should not define dimension for non-Layout component unless explicitly inherited', function () {
-                    expect(component.props.style.height).to.equal(undefined);
-                });
-                it('should subtract from available dimension when border style is used', function () {
-                    expect(component.props.style.width).to.equal(windowSize.width - 2);
-                });
+            if (ReactTestUtils.isCompositeComponent(component)) {
+                if (component.props.id === 'firstLayout') {
+                    it('should inherit height and width from parent layout', function () {
+                        expect(component.props.layoutContext.height).to.equal(windowSize.height);
+                        expect(component.props.layoutContext.width).to.equal(windowSize.width);
+                    });
+                }
+                else if (component.props.id === 'firstLayoutChild_InheritHeightNonLayout') {
+                    it('should not define dimension for non-Layout component unless explicitly inherited', function () {
+                        expect(component.props.style.width).to.equal(undefined);
+                    });
+                    it('should subtract from available dimension when border style is used', function () {
+                        expect(component.props.style.height).to.equal(windowSize.height - 2);
+                    });
+                }
+                else if (component.props.id === 'firstLayoutChild_InheritWidthNonLayout') {
+                    it('should not define dimension for non-Layout component unless explicitly inherited', function () {
+                        expect(component.props.style.height).to.equal(undefined);
+                    });
+                    it('should subtract from available dimension when border style is used', function () {
+                        expect(component.props.style.width).to.equal(windowSize.width - 2);
+                    });
+                }
             }
         });
         
         // Asserting behavior with padding
         ReactTestUtils.findAllInRenderedTree(layoutPadding, function (component) {
-            if (component.props.id === 'firstLayoutChild') {
+            if (ReactTestUtils.isCompositeComponent(component) && component.props.id === 'firstLayoutChild') {
                 it('should subtract from available dimension when padding style is used', function () {
                     expect(component.props.style.height).to.equal(windowSize.height - 2);
                 });
@@ -118,7 +120,7 @@
 
         // Asserting behavior with margin
         ReactTestUtils.findAllInRenderedTree(layoutMargin, function (component) {
-            if (component.props.id === 'firstLayoutChild') {
+            if (ReactTestUtils.isCompositeComponent(component) && component.props.id === 'firstLayoutChild') {
                 it('should subtract from available dimension when margin style is used', function () {
                     expect(component.props.style.height).to.equal(windowSize.height - 2);
                 });
