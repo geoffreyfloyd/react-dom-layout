@@ -1,11 +1,12 @@
 (function (factory) {
     module.exports = exports = factory(
         require('react'),
+        require('react-dom'),
         require('../src/Layout'),
         require('../src/SplitLayout'),
         require('../src/WindowSizeLayout')
     );
-}(function (React, Layout, SplitLayout, WindowSizeLayout) {
+}(function (React, ReactDOM, Layout, SplitLayout, WindowSizeLayout) {
     'use strict';
     var Demo = React.createClass({
 
@@ -82,7 +83,7 @@
 
     // make accessible for browser initialization
     if (window) {
-        React.render(React.createElement(Demo), document.getElementById('demo'));
+        ReactDOM.render(React.createElement(Demo), document.getElementById('demo'));
     }
 
     return Demo;
